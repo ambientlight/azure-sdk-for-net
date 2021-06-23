@@ -50,7 +50,7 @@ namespace Azure.Maps.Alias
             request.Method = RequestMethod.Post;
             var uri = new RawRequestUriBuilder();
             uri.AppendRaw("https://", false);
-            uri.AppendRaw(geography.Value, true);
+            uri.AppendRaw(geography.ToString(), true);
             uri.AppendRaw(".atlas.microsoft.com", false);
             uri.AppendPath("/aliases", false);
             uri.AppendQuery("api-version", apiVersion, true);
@@ -164,7 +164,7 @@ namespace Azure.Maps.Alias
             request.Method = RequestMethod.Get;
             var uri = new RawRequestUriBuilder();
             uri.AppendRaw("https://", false);
-            uri.AppendRaw(geography.Value, true);
+            uri.AppendRaw(geography.ToString(), true);
             uri.AppendRaw(".atlas.microsoft.com", false);
             uri.AppendPath("/aliases", false);
             uri.AppendQuery("api-version", apiVersion, true);
@@ -298,7 +298,7 @@ namespace Azure.Maps.Alias
             request.Method = RequestMethod.Put;
             var uri = new RawRequestUriBuilder();
             uri.AppendRaw("https://", false);
-            uri.AppendRaw(geography.Value, true);
+            uri.AppendRaw(geography.ToString(), true);
             uri.AppendRaw(".atlas.microsoft.com", false);
             uri.AppendPath("/aliases/", false);
             uri.AppendPath(aliasId, true);
@@ -426,7 +426,7 @@ namespace Azure.Maps.Alias
             request.Method = RequestMethod.Delete;
             var uri = new RawRequestUriBuilder();
             uri.AppendRaw("https://", false);
-            uri.AppendRaw(geography.Value, true);
+            uri.AppendRaw(geography.ToString(), true);
             uri.AppendRaw(".atlas.microsoft.com", false);
             uri.AppendPath("/aliases/", false);
             uri.AppendPath(aliasId, true);
@@ -515,7 +515,7 @@ namespace Azure.Maps.Alias
             request.Method = RequestMethod.Get;
             var uri = new RawRequestUriBuilder();
             uri.AppendRaw("https://", false);
-            uri.AppendRaw(geography.Value, true);
+            uri.AppendRaw(geography.ToString(), true);
             uri.AppendRaw(".atlas.microsoft.com", false);
             uri.AppendPath("/aliases/", false);
             uri.AppendPath(aliasId, true);
@@ -642,7 +642,7 @@ namespace Azure.Maps.Alias
             request.Method = RequestMethod.Get;
             var uri = new RawRequestUriBuilder();
             uri.AppendRaw("https://", false);
-            uri.AppendRaw(geography.Value, true);
+            uri.AppendRaw(geography.ToString(), true);
             uri.AppendRaw(".atlas.microsoft.com", false);
             uri.AppendRawNextLink(nextLink, false);
             request.Uri = uri;
