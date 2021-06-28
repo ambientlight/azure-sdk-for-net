@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Description>Azure Maps Timezone</Description>
-    <AssemblyTitle>Azure Maps Timezone</AssemblyTitle>
+    <Description>Azure Maps Azure.Maps.Timezone</Description>
+    <AssemblyTitle>Azure Maps Azure.Maps.Timezone</AssemblyTitle>
     <Version>1.0.0-beta.1</Version>
-    <PackageTags>Azure;Azure Maps;Maps Timezone</PackageTags>
+    <PackageTags>Azure;Azure Maps;Maps Azure.Maps.Timezone</PackageTags>
     <TargetFrameworks>$(RequiredTargetFrameworks)</TargetFrameworks>
   <NoWarn>$(NoWarn);AZC0001;AZC0012</NoWarn></PropertyGroup>
 

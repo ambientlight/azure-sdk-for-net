@@ -443,7 +443,7 @@ namespace Azure.Maps.Route
         /// <param name="format"> Matrix id received after the Matrix Route request was accepted successfully. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="format"/> is null. </exception>
-        public async Task<Response> GetRouteMatrixAsync(string format, CancellationToken cancellationToken = default)
+        public async Task<ResponseWithHeaders<RouteGetRouteMatrixHeaders>> GetRouteMatrixAsync(string format, CancellationToken cancellationToken = default)
         {
             if (format == null)
             {
@@ -452,11 +452,12 @@ namespace Azure.Maps.Route
 
             using var message = CreateGetRouteMatrixRequest(format);
             await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            var headers = new RouteGetRouteMatrixHeaders(message.Response);
             switch (message.Response.Status)
             {
                 case 200:
                 case 202:
-                    return message.Response;
+                    return ResponseWithHeaders.FromValue(headers, message.Response);
                 default:
                     throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
             }
@@ -490,7 +491,7 @@ namespace Azure.Maps.Route
         /// <param name="format"> Matrix id received after the Matrix Route request was accepted successfully. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="format"/> is null. </exception>
-        public Response GetRouteMatrix(string format, CancellationToken cancellationToken = default)
+        public ResponseWithHeaders<RouteGetRouteMatrixHeaders> GetRouteMatrix(string format, CancellationToken cancellationToken = default)
         {
             if (format == null)
             {
@@ -499,11 +500,365 @@ namespace Azure.Maps.Route
 
             using var message = CreateGetRouteMatrixRequest(format);
             _pipeline.Send(message, cancellationToken);
+            var headers = new RouteGetRouteMatrixHeaders(message.Response);
             switch (message.Response.Status)
             {
                 case 200:
                 case 202:
-                    return message.Response;
+                    return ResponseWithHeaders.FromValue(headers, message.Response);
+                default:
+                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
+            }
+        }
+
+        internal HttpMessage CreatePostRouteMatrixSyncRequest(ResponseFormat format, PostRouteMatrixRequestBody postRouteMatrixRequestBody, bool? waitForResults, ComputeTravelTimeFor? computeTravelTimeFor, SectionType? sectionType, DateTimeOffset? arriveAt, DateTimeOffset? departAt, int? vehicleAxleWeight, float? vehicleLength, float? vehicleHeight, float? vehicleWidth, int? vehicleMaxSpeed, int? vehicleWeight, WindingnessLevel? windingness, HillinessDegree? hilliness, TravelMode? travelMode, IEnumerable<RouteAvoidType> avoid, bool? traffic, RouteType? routeType, VehicleLoadType? vehicleLoadType)
+        {
+            var message = _pipeline.CreateMessage();
+            var request = message.Request;
+            request.Method = RequestMethod.Post;
+            var uri = new RawRequestUriBuilder();
+            uri.AppendRaw("https://", false);
+            uri.AppendRaw(geography.ToString(), true);
+            uri.AppendRaw(".atlas.microsoft.com", false);
+            uri.AppendPath("/route/matrix/sync/", false);
+            uri.AppendPath(format.ToString(), true);
+            uri.AppendQuery("api-version", apiVersion, true);
+            if (waitForResults != null)
+            {
+                uri.AppendQuery("waitForResults", waitForResults.Value, true);
+            }
+            if (computeTravelTimeFor != null)
+            {
+                uri.AppendQuery("computeTravelTimeFor", computeTravelTimeFor.Value.ToString(), true);
+            }
+            if (sectionType != null)
+            {
+                uri.AppendQuery("sectionType", sectionType.Value.ToString(), true);
+            }
+            if (arriveAt != null)
+            {
+                uri.AppendQuery("arriveAt", arriveAt.Value, "O", true);
+            }
+            if (departAt != null)
+            {
+                uri.AppendQuery("departAt", departAt.Value, "O", true);
+            }
+            if (vehicleAxleWeight != null)
+            {
+                uri.AppendQuery("vehicleAxleWeight", vehicleAxleWeight.Value, true);
+            }
+            if (vehicleLength != null)
+            {
+                uri.AppendQuery("vehicleLength", vehicleLength.Value, true);
+            }
+            if (vehicleHeight != null)
+            {
+                uri.AppendQuery("vehicleHeight", vehicleHeight.Value, true);
+            }
+            if (vehicleWidth != null)
+            {
+                uri.AppendQuery("vehicleWidth", vehicleWidth.Value, true);
+            }
+            if (vehicleMaxSpeed != null)
+            {
+                uri.AppendQuery("vehicleMaxSpeed", vehicleMaxSpeed.Value, true);
+            }
+            if (vehicleWeight != null)
+            {
+                uri.AppendQuery("vehicleWeight", vehicleWeight.Value, true);
+            }
+            if (windingness != null)
+            {
+                uri.AppendQuery("windingness", windingness.Value.ToString(), true);
+            }
+            if (hilliness != null)
+            {
+                uri.AppendQuery("hilliness", hilliness.Value.ToString(), true);
+            }
+            if (travelMode != null)
+            {
+                uri.AppendQuery("travelMode", travelMode.Value.ToString(), true);
+            }
+            if (avoid != null)
+            {
+                uri.AppendQueryDelimited("avoid", avoid, ",", true);
+            }
+            if (traffic != null)
+            {
+                uri.AppendQuery("traffic", traffic.Value, true);
+            }
+            if (routeType != null)
+            {
+                uri.AppendQuery("routeType", routeType.Value.ToString(), true);
+            }
+            if (vehicleLoadType != null)
+            {
+                uri.AppendQuery("vehicleLoadType", vehicleLoadType.Value.ToString(), true);
+            }
+            request.Uri = uri;
+            if (xMsClientId != null)
+            {
+                request.Headers.Add("x-ms-client-id", xMsClientId);
+            }
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("Content-Type", "application/json");
+            var content = new Utf8JsonRequestContent();
+            content.JsonWriter.WriteObjectValue(postRouteMatrixRequestBody);
+            request.Content = content;
+            return message;
+        }
+
+        /// <summary>
+        /// 
+        /// 
+        /// **Applies to**: S1 pricing tier.
+        /// 
+        /// The Matrix Routing service allows calculation of a matrix of route summaries for a set of routes defined by origin and destination locations by using an asynchronous (async) or synchronous (sync) POST request. For every given origin, the service calculates the cost of routing from that origin to every given destination. The set of origins and the set of destinations can be thought of as the column and row headers of a table and each cell in the table contains the costs of routing from the origin to the destination for that cell. As an example, let&apos;s say a food delivery company has 20 drivers and they need to find the closest driver to pick up the delivery from the restaurant. To solve this use case, they can call Matrix Route API.
+        /// 
+        /// 
+        /// For each route, the travel times and distances are returned. You can use the computed costs to determine which detailed routes to calculate using the Route Directions API.
+        /// 
+        /// 
+        /// The maximum size of a matrix for async request is **700** and for sync request it&apos;s **100** (the number of origins multiplied by the number of destinations).
+        /// 
+        /// 
+        /// 
+        /// ### Submit Synchronous Route Matrix Request
+        /// If your scenario requires synchronous requests and the maximum size of the matrix is less than or equal to 100, you might want to make synchronous request. The maximum size of a matrix for this API is **100** (the number of origins multiplied by the number of destinations). With that constraint in mind, examples of possible matrix dimensions are: 10x10, 6x8, 9x8 (it does not need to be square).
+        /// 
+        /// ```
+        /// POST https://atlas.microsoft.com/route/matrix/sync/json?api-version=1.0&amp;subscription-key={subscription-key}
+        /// ```
+        /// 
+        /// ### Submit Asynchronous Route Matrix Request
+        /// The Asynchronous API is appropriate for processing big volumes of relatively complex routing requests. When you make a request by using async request, by default the service returns a 202 response code along a redirect URL in the Location field of the response header. This URL should be checked periodically until the response data or error information is available. If `waitForResults` parameter in the request is set to true, user will get a 200 response if the request is finished under 120 seconds.
+        /// 
+        /// 
+        /// The maximum size of a matrix for this API is **700** (the number of origins multiplied by the number of destinations). With that constraint in mind, examples of possible matrix dimensions are: 50x10, 10x10, 28x25. 10x70 (it does not need to be square).
+        /// 
+        /// 
+        /// The asynchronous responses are stored for **14** days. The redirect URL returns a 404 response if used after the expiration period.
+        /// 
+        /// 
+        /// 
+        /// 
+        /// ```
+        /// POST https://atlas.microsoft.com/route/matrix/json?api-version=1.0&amp;subscription-key={subscription-key}
+        /// ```
+        /// 
+        /// Here&apos;s a typical sequence of asynchronous operations:
+        /// 1. Client sends a Route Matrix POST request to Azure Maps
+        /// 
+        /// 2. The server will respond with one of the following:
+        /// 
+        ///     &gt; HTTP `202 Accepted` -  Route Matrix request has been accepted.
+        /// 
+        ///     &gt; HTTP `Error` - There was an error processing your Route Matrix request. This could either be a 400 Bad Request or any other Error status code.
+        /// 
+        /// 
+        /// 3. If the Matrix Route request was accepted successfully, the Location header in the response contains the URL to download the results of the request. This status URI looks like the following:
+        /// 
+        ///   ```
+        ///     GET https://atlas.microsoft.com/route/matrix/{matrixId}?api-version=1.0?subscription-key={subscription-key}
+        ///   ```
+        /// 
+        /// 
+        /// 4. Client issues a GET request on the download URL obtained in Step 3 to download the results
+        /// 
+        /// ### Download Sync Results
+        /// When you make a POST request for Route Matrix Sync API, the service returns 200 response code for successful request and a response array. The response body will contain the data and there will be no possibility to retrieve the results later.
+        /// 
+        /// ### Download Async Results
+        /// When a request issues a `202 Accepted` response, the request is being processed using our async pipeline. You will be given a URL to check the progress of your  async request in the location header of the response. This status URI looks like the following:
+        /// ```
+        ///   GET https://atlas.microsoft.com/route/matrix/{matrixId}?api-version=1.0?subscription-key={subscription-key}
+        /// ```
+        /// 
+        /// The URL provided by the location header will return the following responses when a `GET` request is issued.
+        /// 
+        ///   &gt; HTTP `202 Accepted` - Matrix request was accepted but is still being processed. Please try again in some time.
+        /// 
+        ///   &gt; HTTP `200 OK` - Matrix request successfully processed. The response body contains all of the results.
+        /// </summary>
+        /// <param name="format"> Desired format of the response. Only `json` format is supported. </param>
+        /// <param name="postRouteMatrixRequestBody"> The matrix of origin and destination coordinates to compute the route distance, travel time and other summary for each cell of the matrix based on the input parameters. The minimum and the maximum cell count supported are 1 and **700** for async and **100** for sync respectively. For example, it can be 35 origins and 20 destinations or 25 origins and 25 destinations for async API. </param>
+        /// <param name="waitForResults"> Boolean to indicate whether to execute the request synchronously. If set to true, user will get a 200 response if the request is finished under 120 seconds. Otherwise, user will get a 202 response right away. Please refer to the API description for more details on 202 response. **Supported only for async request**. </param>
+        /// <param name="computeTravelTimeFor"> Specifies whether to return additional travel times using different types of traffic information (none, historic, live) as well as the default best-estimate travel time. </param>
+        /// <param name="sectionType"> Specifies which of the section types is reported in the route response. &lt;br&gt;&lt;br&gt;For example if sectionType = pedestrian the sections which are suited for pedestrians only are returned. Multiple types can be used. The default sectionType refers to the travelMode input. By default travelMode is set to car. </param>
+        /// <param name="arriveAt"> The date and time of arrival at the destination point. It must be specified as a dateTime. When a time zone offset is not specified it will be assumed to be that of the destination point. The arriveAt value must be in the future. The arriveAt parameter cannot be used in conjunction with departAt, minDeviationDistance or minDeviationTime. </param>
+        /// <param name="departAt"> The date and time of departure from the origin point. Departure times apart from now must be specified as a dateTime. When a time zone offset is not specified, it will be assumed to be that of the origin point. The departAt value must be in the future in the date-time format (1996-12-19T16:39:57-08:00). </param>
+        /// <param name="vehicleAxleWeight"> Weight per axle of the vehicle in kg. A value of 0 means that weight restrictions per axle are not considered. </param>
+        /// <param name="vehicleLength"> Length of the vehicle in meters. A value of 0 means that length restrictions are not considered. </param>
+        /// <param name="vehicleHeight"> Height of the vehicle in meters. A value of 0 means that height restrictions are not considered. </param>
+        /// <param name="vehicleWidth"> Width of the vehicle in meters. A value of 0 means that width restrictions are not considered. </param>
+        /// <param name="vehicleMaxSpeed">
+        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways.
+        /// 
+        /// * A value of 0 means that an appropriate value for the vehicle will be determined and applied during route planning.
+        /// 
+        /// * A non-zero value may be overridden during route planning. For example, the current traffic flow is 60 km/hour. If the vehicle  maximum speed is set to 50 km/hour, the routing engine will consider 60 km/hour as this is the current situation.  If the maximum speed of the vehicle is provided as 80 km/hour but the current traffic flow is 60 km/hour, then routing engine will again use 60 km/hour.
+        /// </param>
+        /// <param name="vehicleWeight"> Weight of the vehicle in kilograms. </param>
+        /// <param name="windingness"> Level of turns for thrilling route. This parameter can only be used in conjunction with `routeType`=thrilling. </param>
+        /// <param name="hilliness"> Degree of hilliness for thrilling route. This parameter can only be used in conjunction with `routeType`=thrilling. </param>
+        /// <param name="travelMode"> The mode of travel for the requested route. If not defined, default is &apos;car&apos;. Note that the requested travelMode may not be available for the entire route. Where the requested travelMode is not available for a particular section, the travelMode element of the response for that section will be &quot;other&quot;. Note that travel modes bus, motorcycle, taxi and van are BETA functionality. Full restriction data is not available in all areas. In **calculateReachableRange** requests, the values bicycle and pedestrian must not be used. </param>
+        /// <param name="avoid"> Specifies something that the route calculation should try to avoid when determining the route. Can be specified multiple times in one request, for example, &apos;&amp;avoid=motorways&amp;avoid=tollRoads&amp;avoid=ferries&apos;. In calculateReachableRange requests, the value alreadyUsedRoads must not be used. </param>
+        /// <param name="traffic">
+        /// Possible values:
+        ///   * true - Do consider all available traffic information during routing
+        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored
+        ///   during routing, the effect of historic traffic on effective road speeds is still incorporated.
+        /// </param>
+        /// <param name="routeType"> The type of route requested. </param>
+        /// <param name="vehicleLoadType"> Types of cargo that may be classified as hazardous materials and restricted from some roads. Available vehicleLoadType values are US Hazmat classes 1 through 9, plus generic classifications for use in other countries. Values beginning with USHazmat are for US routing while otherHazmat should be used for all other countries. vehicleLoadType can be specified multiple times. This parameter is currently only considered for travelMode=truck. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="postRouteMatrixRequestBody"/> is null. </exception>
+        public async Task<Response<RouteMatrixResponse>> PostRouteMatrixSyncAsync(ResponseFormat format, PostRouteMatrixRequestBody postRouteMatrixRequestBody, bool? waitForResults = null, ComputeTravelTimeFor? computeTravelTimeFor = null, SectionType? sectionType = null, DateTimeOffset? arriveAt = null, DateTimeOffset? departAt = null, int? vehicleAxleWeight = null, float? vehicleLength = null, float? vehicleHeight = null, float? vehicleWidth = null, int? vehicleMaxSpeed = null, int? vehicleWeight = null, WindingnessLevel? windingness = null, HillinessDegree? hilliness = null, TravelMode? travelMode = null, IEnumerable<RouteAvoidType> avoid = null, bool? traffic = null, RouteType? routeType = null, VehicleLoadType? vehicleLoadType = null, CancellationToken cancellationToken = default)
+        {
+            if (postRouteMatrixRequestBody == null)
+            {
+                throw new ArgumentNullException(nameof(postRouteMatrixRequestBody));
+            }
+
+            using var message = CreatePostRouteMatrixSyncRequest(format, postRouteMatrixRequestBody, waitForResults, computeTravelTimeFor, sectionType, arriveAt, departAt, vehicleAxleWeight, vehicleLength, vehicleHeight, vehicleWidth, vehicleMaxSpeed, vehicleWeight, windingness, hilliness, travelMode, avoid, traffic, routeType, vehicleLoadType);
+            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            switch (message.Response.Status)
+            {
+                case 200:
+                    {
+                        RouteMatrixResponse value = default;
+                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
+                        value = RouteMatrixResponse.DeserializeRouteMatrixResponse(document.RootElement);
+                        return Response.FromValue(value, message.Response);
+                    }
+                default:
+                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// 
+        /// **Applies to**: S1 pricing tier.
+        /// 
+        /// The Matrix Routing service allows calculation of a matrix of route summaries for a set of routes defined by origin and destination locations by using an asynchronous (async) or synchronous (sync) POST request. For every given origin, the service calculates the cost of routing from that origin to every given destination. The set of origins and the set of destinations can be thought of as the column and row headers of a table and each cell in the table contains the costs of routing from the origin to the destination for that cell. As an example, let&apos;s say a food delivery company has 20 drivers and they need to find the closest driver to pick up the delivery from the restaurant. To solve this use case, they can call Matrix Route API.
+        /// 
+        /// 
+        /// For each route, the travel times and distances are returned. You can use the computed costs to determine which detailed routes to calculate using the Route Directions API.
+        /// 
+        /// 
+        /// The maximum size of a matrix for async request is **700** and for sync request it&apos;s **100** (the number of origins multiplied by the number of destinations).
+        /// 
+        /// 
+        /// 
+        /// ### Submit Synchronous Route Matrix Request
+        /// If your scenario requires synchronous requests and the maximum size of the matrix is less than or equal to 100, you might want to make synchronous request. The maximum size of a matrix for this API is **100** (the number of origins multiplied by the number of destinations). With that constraint in mind, examples of possible matrix dimensions are: 10x10, 6x8, 9x8 (it does not need to be square).
+        /// 
+        /// ```
+        /// POST https://atlas.microsoft.com/route/matrix/sync/json?api-version=1.0&amp;subscription-key={subscription-key}
+        /// ```
+        /// 
+        /// ### Submit Asynchronous Route Matrix Request
+        /// The Asynchronous API is appropriate for processing big volumes of relatively complex routing requests. When you make a request by using async request, by default the service returns a 202 response code along a redirect URL in the Location field of the response header. This URL should be checked periodically until the response data or error information is available. If `waitForResults` parameter in the request is set to true, user will get a 200 response if the request is finished under 120 seconds.
+        /// 
+        /// 
+        /// The maximum size of a matrix for this API is **700** (the number of origins multiplied by the number of destinations). With that constraint in mind, examples of possible matrix dimensions are: 50x10, 10x10, 28x25. 10x70 (it does not need to be square).
+        /// 
+        /// 
+        /// The asynchronous responses are stored for **14** days. The redirect URL returns a 404 response if used after the expiration period.
+        /// 
+        /// 
+        /// 
+        /// 
+        /// ```
+        /// POST https://atlas.microsoft.com/route/matrix/json?api-version=1.0&amp;subscription-key={subscription-key}
+        /// ```
+        /// 
+        /// Here&apos;s a typical sequence of asynchronous operations:
+        /// 1. Client sends a Route Matrix POST request to Azure Maps
+        /// 
+        /// 2. The server will respond with one of the following:
+        /// 
+        ///     &gt; HTTP `202 Accepted` -  Route Matrix request has been accepted.
+        /// 
+        ///     &gt; HTTP `Error` - There was an error processing your Route Matrix request. This could either be a 400 Bad Request or any other Error status code.
+        /// 
+        /// 
+        /// 3. If the Matrix Route request was accepted successfully, the Location header in the response contains the URL to download the results of the request. This status URI looks like the following:
+        /// 
+        ///   ```
+        ///     GET https://atlas.microsoft.com/route/matrix/{matrixId}?api-version=1.0?subscription-key={subscription-key}
+        ///   ```
+        /// 
+        /// 
+        /// 4. Client issues a GET request on the download URL obtained in Step 3 to download the results
+        /// 
+        /// ### Download Sync Results
+        /// When you make a POST request for Route Matrix Sync API, the service returns 200 response code for successful request and a response array. The response body will contain the data and there will be no possibility to retrieve the results later.
+        /// 
+        /// ### Download Async Results
+        /// When a request issues a `202 Accepted` response, the request is being processed using our async pipeline. You will be given a URL to check the progress of your  async request in the location header of the response. This status URI looks like the following:
+        /// ```
+        ///   GET https://atlas.microsoft.com/route/matrix/{matrixId}?api-version=1.0?subscription-key={subscription-key}
+        /// ```
+        /// 
+        /// The URL provided by the location header will return the following responses when a `GET` request is issued.
+        /// 
+        ///   &gt; HTTP `202 Accepted` - Matrix request was accepted but is still being processed. Please try again in some time.
+        /// 
+        ///   &gt; HTTP `200 OK` - Matrix request successfully processed. The response body contains all of the results.
+        /// </summary>
+        /// <param name="format"> Desired format of the response. Only `json` format is supported. </param>
+        /// <param name="postRouteMatrixRequestBody"> The matrix of origin and destination coordinates to compute the route distance, travel time and other summary for each cell of the matrix based on the input parameters. The minimum and the maximum cell count supported are 1 and **700** for async and **100** for sync respectively. For example, it can be 35 origins and 20 destinations or 25 origins and 25 destinations for async API. </param>
+        /// <param name="waitForResults"> Boolean to indicate whether to execute the request synchronously. If set to true, user will get a 200 response if the request is finished under 120 seconds. Otherwise, user will get a 202 response right away. Please refer to the API description for more details on 202 response. **Supported only for async request**. </param>
+        /// <param name="computeTravelTimeFor"> Specifies whether to return additional travel times using different types of traffic information (none, historic, live) as well as the default best-estimate travel time. </param>
+        /// <param name="sectionType"> Specifies which of the section types is reported in the route response. &lt;br&gt;&lt;br&gt;For example if sectionType = pedestrian the sections which are suited for pedestrians only are returned. Multiple types can be used. The default sectionType refers to the travelMode input. By default travelMode is set to car. </param>
+        /// <param name="arriveAt"> The date and time of arrival at the destination point. It must be specified as a dateTime. When a time zone offset is not specified it will be assumed to be that of the destination point. The arriveAt value must be in the future. The arriveAt parameter cannot be used in conjunction with departAt, minDeviationDistance or minDeviationTime. </param>
+        /// <param name="departAt"> The date and time of departure from the origin point. Departure times apart from now must be specified as a dateTime. When a time zone offset is not specified, it will be assumed to be that of the origin point. The departAt value must be in the future in the date-time format (1996-12-19T16:39:57-08:00). </param>
+        /// <param name="vehicleAxleWeight"> Weight per axle of the vehicle in kg. A value of 0 means that weight restrictions per axle are not considered. </param>
+        /// <param name="vehicleLength"> Length of the vehicle in meters. A value of 0 means that length restrictions are not considered. </param>
+        /// <param name="vehicleHeight"> Height of the vehicle in meters. A value of 0 means that height restrictions are not considered. </param>
+        /// <param name="vehicleWidth"> Width of the vehicle in meters. A value of 0 means that width restrictions are not considered. </param>
+        /// <param name="vehicleMaxSpeed">
+        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways.
+        /// 
+        /// * A value of 0 means that an appropriate value for the vehicle will be determined and applied during route planning.
+        /// 
+        /// * A non-zero value may be overridden during route planning. For example, the current traffic flow is 60 km/hour. If the vehicle  maximum speed is set to 50 km/hour, the routing engine will consider 60 km/hour as this is the current situation.  If the maximum speed of the vehicle is provided as 80 km/hour but the current traffic flow is 60 km/hour, then routing engine will again use 60 km/hour.
+        /// </param>
+        /// <param name="vehicleWeight"> Weight of the vehicle in kilograms. </param>
+        /// <param name="windingness"> Level of turns for thrilling route. This parameter can only be used in conjunction with `routeType`=thrilling. </param>
+        /// <param name="hilliness"> Degree of hilliness for thrilling route. This parameter can only be used in conjunction with `routeType`=thrilling. </param>
+        /// <param name="travelMode"> The mode of travel for the requested route. If not defined, default is &apos;car&apos;. Note that the requested travelMode may not be available for the entire route. Where the requested travelMode is not available for a particular section, the travelMode element of the response for that section will be &quot;other&quot;. Note that travel modes bus, motorcycle, taxi and van are BETA functionality. Full restriction data is not available in all areas. In **calculateReachableRange** requests, the values bicycle and pedestrian must not be used. </param>
+        /// <param name="avoid"> Specifies something that the route calculation should try to avoid when determining the route. Can be specified multiple times in one request, for example, &apos;&amp;avoid=motorways&amp;avoid=tollRoads&amp;avoid=ferries&apos;. In calculateReachableRange requests, the value alreadyUsedRoads must not be used. </param>
+        /// <param name="traffic">
+        /// Possible values:
+        ///   * true - Do consider all available traffic information during routing
+        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored
+        ///   during routing, the effect of historic traffic on effective road speeds is still incorporated.
+        /// </param>
+        /// <param name="routeType"> The type of route requested. </param>
+        /// <param name="vehicleLoadType"> Types of cargo that may be classified as hazardous materials and restricted from some roads. Available vehicleLoadType values are US Hazmat classes 1 through 9, plus generic classifications for use in other countries. Values beginning with USHazmat are for US routing while otherHazmat should be used for all other countries. vehicleLoadType can be specified multiple times. This parameter is currently only considered for travelMode=truck. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="postRouteMatrixRequestBody"/> is null. </exception>
+        public Response<RouteMatrixResponse> PostRouteMatrixSync(ResponseFormat format, PostRouteMatrixRequestBody postRouteMatrixRequestBody, bool? waitForResults = null, ComputeTravelTimeFor? computeTravelTimeFor = null, SectionType? sectionType = null, DateTimeOffset? arriveAt = null, DateTimeOffset? departAt = null, int? vehicleAxleWeight = null, float? vehicleLength = null, float? vehicleHeight = null, float? vehicleWidth = null, int? vehicleMaxSpeed = null, int? vehicleWeight = null, WindingnessLevel? windingness = null, HillinessDegree? hilliness = null, TravelMode? travelMode = null, IEnumerable<RouteAvoidType> avoid = null, bool? traffic = null, RouteType? routeType = null, VehicleLoadType? vehicleLoadType = null, CancellationToken cancellationToken = default)
+        {
+            if (postRouteMatrixRequestBody == null)
+            {
+                throw new ArgumentNullException(nameof(postRouteMatrixRequestBody));
+            }
+
+            using var message = CreatePostRouteMatrixSyncRequest(format, postRouteMatrixRequestBody, waitForResults, computeTravelTimeFor, sectionType, arriveAt, departAt, vehicleAxleWeight, vehicleLength, vehicleHeight, vehicleWidth, vehicleMaxSpeed, vehicleWeight, windingness, hilliness, travelMode, avoid, traffic, routeType, vehicleLoadType);
+            _pipeline.Send(message, cancellationToken);
+            switch (message.Response.Status)
+            {
+                case 200:
+                    {
+                        RouteMatrixResponse value = default;
+                        using var document = JsonDocument.Parse(message.Response.ContentStream);
+                        value = RouteMatrixResponse.DeserializeRouteMatrixResponse(document.RootElement);
+                        return Response.FromValue(value, message.Response);
+                    }
                 default:
                     throw _clientDiagnostics.CreateRequestFailedException(message.Response);
             }
@@ -2586,7 +2941,7 @@ namespace Azure.Maps.Route
         /// <param name="postRouteDirectionsBatchRequestBody"> The list of route directions queries/requests to process. The list can contain  a max of 700 queries for async and 100 queries for sync version and must contain at least 1 query. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="postRouteDirectionsBatchRequestBody"/> is null. </exception>
-        public async Task<Response> PostRouteDirectionsBatchAsync(ResponseFormat format, BatchRequestBody postRouteDirectionsBatchRequestBody, CancellationToken cancellationToken = default)
+        public async Task<ResponseWithHeaders<RoutePostRouteDirectionsBatchHeaders>> PostRouteDirectionsBatchAsync(ResponseFormat format, BatchRequestBody postRouteDirectionsBatchRequestBody, CancellationToken cancellationToken = default)
         {
             if (postRouteDirectionsBatchRequestBody == null)
             {
@@ -2595,10 +2950,12 @@ namespace Azure.Maps.Route
 
             using var message = CreatePostRouteDirectionsBatchRequest(format, postRouteDirectionsBatchRequestBody);
             await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            var headers = new RoutePostRouteDirectionsBatchHeaders(message.Response);
             switch (message.Response.Status)
             {
+                case 200:
                 case 202:
-                    return message.Response;
+                    return ResponseWithHeaders.FromValue(headers, message.Response);
                 default:
                     throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
             }
@@ -2764,7 +3121,7 @@ namespace Azure.Maps.Route
         /// <param name="postRouteDirectionsBatchRequestBody"> The list of route directions queries/requests to process. The list can contain  a max of 700 queries for async and 100 queries for sync version and must contain at least 1 query. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="postRouteDirectionsBatchRequestBody"/> is null. </exception>
-        public Response PostRouteDirectionsBatch(ResponseFormat format, BatchRequestBody postRouteDirectionsBatchRequestBody, CancellationToken cancellationToken = default)
+        public ResponseWithHeaders<RoutePostRouteDirectionsBatchHeaders> PostRouteDirectionsBatch(ResponseFormat format, BatchRequestBody postRouteDirectionsBatchRequestBody, CancellationToken cancellationToken = default)
         {
             if (postRouteDirectionsBatchRequestBody == null)
             {
@@ -2773,10 +3130,12 @@ namespace Azure.Maps.Route
 
             using var message = CreatePostRouteDirectionsBatchRequest(format, postRouteDirectionsBatchRequestBody);
             _pipeline.Send(message, cancellationToken);
+            var headers = new RoutePostRouteDirectionsBatchHeaders(message.Response);
             switch (message.Response.Status)
             {
+                case 200:
                 case 202:
-                    return message.Response;
+                    return ResponseWithHeaders.FromValue(headers, message.Response);
                 default:
                     throw _clientDiagnostics.CreateRequestFailedException(message.Response);
             }
@@ -2905,7 +3264,7 @@ namespace Azure.Maps.Route
         /// <param name="format"> Batch id for querying the operation. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="format"/> is null. </exception>
-        public async Task<Response> GetRouteDirectionsBatchAsync(string format, CancellationToken cancellationToken = default)
+        public async Task<ResponseWithHeaders<RouteGetRouteDirectionsBatchHeaders>> GetRouteDirectionsBatchAsync(string format, CancellationToken cancellationToken = default)
         {
             if (format == null)
             {
@@ -2914,11 +3273,12 @@ namespace Azure.Maps.Route
 
             using var message = CreateGetRouteDirectionsBatchRequest(format);
             await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            var headers = new RouteGetRouteDirectionsBatchHeaders(message.Response);
             switch (message.Response.Status)
             {
                 case 200:
                 case 202:
-                    return message.Response;
+                    return ResponseWithHeaders.FromValue(headers, message.Response);
                 default:
                     throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
             }
@@ -3026,7 +3386,7 @@ namespace Azure.Maps.Route
         /// <param name="format"> Batch id for querying the operation. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="format"/> is null. </exception>
-        public Response GetRouteDirectionsBatch(string format, CancellationToken cancellationToken = default)
+        public ResponseWithHeaders<RouteGetRouteDirectionsBatchHeaders> GetRouteDirectionsBatch(string format, CancellationToken cancellationToken = default)
         {
             if (format == null)
             {
@@ -3035,11 +3395,12 @@ namespace Azure.Maps.Route
 
             using var message = CreateGetRouteDirectionsBatchRequest(format);
             _pipeline.Send(message, cancellationToken);
+            var headers = new RouteGetRouteDirectionsBatchHeaders(message.Response);
             switch (message.Response.Status)
             {
                 case 200:
                 case 202:
-                    return message.Response;
+                    return ResponseWithHeaders.FromValue(headers, message.Response);
                 default:
                     throw _clientDiagnostics.CreateRequestFailedException(message.Response);
             }
@@ -3082,7 +3443,149 @@ namespace Azure.Maps.Route
         /// ### Submit Synchronous Batch Request
         /// The Synchronous API is recommended for lightweight batch requests. When the service receives a request, it will respond as soon as the batch items are calculated and there will be no possibility to retrieve the results later. The Synchronous API will return a timeout error (a 408 response) if the request takes longer than 60 seconds. The number of batch items is limited to **100** for this API.
         /// ```
-        /// .
+        /// POST https://atlas.microsoft.com/route/directions/batch/sync/json?api-version=1.0&amp;subscription-key={subscription-key}
+        /// ```
+        /// ### Submit Asynchronous Batch Request
+        /// The Asynchronous API is appropriate for processing big volumes of relatively complex route requests
+        /// - It allows the retrieval of results in a separate call (multiple downloads are possible).
+        /// - The asynchronous API is optimized for reliability and is not expected to run into a timeout.
+        /// - The number of batch items is limited to **700** for this API.
+        /// 
+        /// When you make a request by using async request, by default the service returns a 202 response code along a redirect URL in the Location field of the response header. This URL should be checked periodically until the response data or error information is available.
+        /// The asynchronous responses are stored for **14** days. The redirect URL returns a 404 response if used after the expiration period.
+        /// 
+        /// Please note that asynchronous batch request is a long-running request. Here&apos;s a typical sequence of operations:
+        /// 1. Client sends a Route Directions Batch `POST` request to Azure Maps
+        /// 2. The server will respond with one of the following:
+        /// 
+        ///     &gt; HTTP `202 Accepted` - Batch request has been accepted.
+        /// 
+        ///     &gt; HTTP `Error` - There was an error processing your Batch request. This could either be a `400 Bad Request` or any other `Error` status code.
+        /// 
+        /// 3. If the batch request was accepted successfully, the `Location` header in the response contains the URL to download the results of the batch request.
+        ///     This status URI looks like following:
+        /// 
+        /// ``` GET https://atlas.microsoft.com/batch/{batch-id}?api-version=1.0 ```
+        /// Note:- Please remember to add AUTH information (subscription-key/azure_auth - See [Security](#security)) to the _status URI_ before running it. &lt;br&gt;
+        /// 4. Client issues a `GET` request on the _download URL_ obtained in Step 3 to download the batch results.
+        /// 
+        /// ### POST Body for Batch Request
+        /// To send the _route directions_ queries you will use a `POST` request where the request body will contain the `batchItems` array in `json` format and the `Content-Type` header will be set to `application/json`. Here&apos;s a sample request body containing 3 _route directions_ queries:
+        /// 
+        /// 
+        /// ```json
+        /// {
+        ///     &quot;batchItems&quot;: [
+        ///         { &quot;query&quot;: &quot;?query=47.620659,-122.348934:47.610101,-122.342015&amp;travelMode=bicycle&amp;routeType=eco&amp;traffic=false&quot; },
+        ///         { &quot;query&quot;: &quot;?query=40.759856,-73.985108:40.771136,-73.973506&amp;travelMode=pedestrian&amp;routeType=shortest&quot; },
+        ///         { &quot;query&quot;: &quot;?query=48.923159,-122.557362:32.621279,-116.840362&quot; }
+        ///     ]
+        /// }
+        /// ```
+        /// 
+        /// A _route directions_ query in a batch is just a partial URL _without_ the protocol, base URL, path, api-version and subscription-key. It can accept any of the supported _route directions_ [URI parameters](https://docs.microsoft.com/en-us/rest/api/maps/route/getroutedirections#uri-parameters). The string values in the _route directions_ query must be properly escaped (e.g. &quot; character should be escaped with \\ ) and it should also be properly URL-encoded.
+        /// 
+        /// 
+        /// The async API allows caller to batch up to **700** queries and sync API up to **100** queries, and the batch should contain at least **1** query.
+        /// 
+        /// 
+        /// ### Download Asynchronous Batch Results
+        /// To download the async batch results you will issue a `GET` request to the batch download endpoint. This _download URL_ can be obtained from the `Location` header of a successful `POST` batch request and looks like the following:
+        /// 
+        /// ```
+        /// https://atlas.microsoft.com/batch/{batch-id}?api-version=1.0&amp;subscription-key={subscription-key}
+        /// ```
+        /// Here&apos;s the typical sequence of operations for downloading the batch results:
+        /// 1. Client sends a `GET` request using the _download URL_.
+        /// 2. The server will respond with one of the following:
+        /// 
+        ///     &gt; HTTP `202 Accepted` - Batch request was accepted but is still being processed. Please try again in some time.
+        /// 
+        ///     &gt; HTTP `200 OK` - Batch request successfully processed. The response body contains all the batch results.
+        /// 
+        /// 
+        /// 
+        /// ### Batch Response Model
+        /// The returned data content is similar for async and sync requests. When downloading the results of an async batch request, if the batch has finished processing, the response body contains the batch response. This batch response contains a `summary` component that indicates the `totalRequests` that were part of the original batch request and `successfulRequests`i.e. queries which were executed successfully. The batch response also includes a `batchItems` array which contains a response for each and every query in the batch request. The `batchItems` will contain the results in the exact same order the original queries were sent in the batch request. Each item in `batchItems` contains `statusCode` and `response` fields. Each `response` in `batchItems` is of one of the following types:
+        /// 
+        ///   - [`RouteDirectionsResponse`](https://docs.microsoft.com/en-us/rest/api/maps/route/getroutedirections#routedirectionsresponse) - If the query completed successfully.
+        /// 
+        ///   - `Error` - If the query failed. The response will contain a `code` and a `message` in this case.
+        /// 
+        /// 
+        /// Here&apos;s a sample Batch Response with 1 _successful_ and 1 _failed_ result:
+        /// 
+        /// 
+        /// ```json
+        /// {
+        ///     &quot;summary&quot;: {
+        ///         &quot;successfulRequests&quot;: 1,
+        ///         &quot;totalRequests&quot;: 2
+        ///     },
+        ///     &quot;batchItems&quot;: [
+        ///         {
+        ///             &quot;statusCode&quot;: 200,
+        ///             &quot;response&quot;: {
+        ///                 &quot;routes&quot;: [
+        ///                     {
+        ///                         &quot;summary&quot;: {
+        ///                             &quot;lengthInMeters&quot;: 1758,
+        ///                             &quot;travelTimeInSeconds&quot;: 387,
+        ///                             &quot;trafficDelayInSeconds&quot;: 0,
+        ///                             &quot;departureTime&quot;: &quot;2018-07-17T00:49:56+00:00&quot;,
+        ///                             &quot;arrivalTime&quot;: &quot;2018-07-17T00:56:22+00:00&quot;
+        ///                         },
+        ///                         &quot;legs&quot;: [
+        ///                             {
+        ///                                 &quot;summary&quot;: {
+        ///                                     &quot;lengthInMeters&quot;: 1758,
+        ///                                     &quot;travelTimeInSeconds&quot;: 387,
+        ///                                     &quot;trafficDelayInSeconds&quot;: 0,
+        ///                                     &quot;departureTime&quot;: &quot;2018-07-17T00:49:56+00:00&quot;,
+        ///                                     &quot;arrivalTime&quot;: &quot;2018-07-17T00:56:22+00:00&quot;
+        ///                                 },
+        ///                                 &quot;points&quot;: [
+        ///                                     {
+        ///                                         &quot;latitude&quot;: 47.62094,
+        ///                                         &quot;longitude&quot;: -122.34892
+        ///                                     },
+        ///                                     {
+        ///                                         &quot;latitude&quot;: 47.62094,
+        ///                                         &quot;longitude&quot;: -122.3485
+        ///                                     },
+        ///                                     {
+        ///                                         &quot;latitude&quot;: 47.62095,
+        ///                                         &quot;longitude&quot;: -122.3476
+        ///                                     }
+        ///                                 ]
+        ///                             }
+        ///                         ],
+        ///                         &quot;sections&quot;: [
+        ///                             {
+        ///                                 &quot;startPointIndex&quot;: 0,
+        ///                                 &quot;endPointIndex&quot;: 40,
+        ///                                 &quot;sectionType&quot;: &quot;TRAVEL_MODE&quot;,
+        ///                                 &quot;travelMode&quot;: &quot;bicycle&quot;
+        ///                             }
+        ///                         ]
+        ///                     }
+        ///                 ]
+        ///             }
+        ///         },
+        ///         {
+        ///             &quot;statusCode&quot;: 400,
+        ///             &quot;response&quot;:
+        ///             {
+        ///                 &quot;error&quot;:
+        ///                 {
+        ///                     &quot;code&quot;: &quot;400 BadRequest&quot;,
+        ///                     &quot;message&quot;: &quot;Bad request: one or more parameters were incorrectly specified or are mutually exclusive.&quot;
+        ///                 }
+        ///             }
+        ///         }
+        ///     ]
+        /// }
+        /// ```.
         /// </summary>
         /// <param name="format"> Desired format of the response. Only `json` format is supported. </param>
         /// <param name="postRouteDirectionsBatchRequestBody"> The list of route directions queries/requests to process. The list can contain  a max of 700 queries for async and 100 queries for sync version and must contain at least 1 query. </param>
@@ -3123,7 +3626,149 @@ namespace Azure.Maps.Route
         /// ### Submit Synchronous Batch Request
         /// The Synchronous API is recommended for lightweight batch requests. When the service receives a request, it will respond as soon as the batch items are calculated and there will be no possibility to retrieve the results later. The Synchronous API will return a timeout error (a 408 response) if the request takes longer than 60 seconds. The number of batch items is limited to **100** for this API.
         /// ```
-        /// .
+        /// POST https://atlas.microsoft.com/route/directions/batch/sync/json?api-version=1.0&amp;subscription-key={subscription-key}
+        /// ```
+        /// ### Submit Asynchronous Batch Request
+        /// The Asynchronous API is appropriate for processing big volumes of relatively complex route requests
+        /// - It allows the retrieval of results in a separate call (multiple downloads are possible).
+        /// - The asynchronous API is optimized for reliability and is not expected to run into a timeout.
+        /// - The number of batch items is limited to **700** for this API.
+        /// 
+        /// When you make a request by using async request, by default the service returns a 202 response code along a redirect URL in the Location field of the response header. This URL should be checked periodically until the response data or error information is available.
+        /// The asynchronous responses are stored for **14** days. The redirect URL returns a 404 response if used after the expiration period.
+        /// 
+        /// Please note that asynchronous batch request is a long-running request. Here&apos;s a typical sequence of operations:
+        /// 1. Client sends a Route Directions Batch `POST` request to Azure Maps
+        /// 2. The server will respond with one of the following:
+        /// 
+        ///     &gt; HTTP `202 Accepted` - Batch request has been accepted.
+        /// 
+        ///     &gt; HTTP `Error` - There was an error processing your Batch request. This could either be a `400 Bad Request` or any other `Error` status code.
+        /// 
+        /// 3. If the batch request was accepted successfully, the `Location` header in the response contains the URL to download the results of the batch request.
+        ///     This status URI looks like following:
+        /// 
+        /// ``` GET https://atlas.microsoft.com/batch/{batch-id}?api-version=1.0 ```
+        /// Note:- Please remember to add AUTH information (subscription-key/azure_auth - See [Security](#security)) to the _status URI_ before running it. &lt;br&gt;
+        /// 4. Client issues a `GET` request on the _download URL_ obtained in Step 3 to download the batch results.
+        /// 
+        /// ### POST Body for Batch Request
+        /// To send the _route directions_ queries you will use a `POST` request where the request body will contain the `batchItems` array in `json` format and the `Content-Type` header will be set to `application/json`. Here&apos;s a sample request body containing 3 _route directions_ queries:
+        /// 
+        /// 
+        /// ```json
+        /// {
+        ///     &quot;batchItems&quot;: [
+        ///         { &quot;query&quot;: &quot;?query=47.620659,-122.348934:47.610101,-122.342015&amp;travelMode=bicycle&amp;routeType=eco&amp;traffic=false&quot; },
+        ///         { &quot;query&quot;: &quot;?query=40.759856,-73.985108:40.771136,-73.973506&amp;travelMode=pedestrian&amp;routeType=shortest&quot; },
+        ///         { &quot;query&quot;: &quot;?query=48.923159,-122.557362:32.621279,-116.840362&quot; }
+        ///     ]
+        /// }
+        /// ```
+        /// 
+        /// A _route directions_ query in a batch is just a partial URL _without_ the protocol, base URL, path, api-version and subscription-key. It can accept any of the supported _route directions_ [URI parameters](https://docs.microsoft.com/en-us/rest/api/maps/route/getroutedirections#uri-parameters). The string values in the _route directions_ query must be properly escaped (e.g. &quot; character should be escaped with \\ ) and it should also be properly URL-encoded.
+        /// 
+        /// 
+        /// The async API allows caller to batch up to **700** queries and sync API up to **100** queries, and the batch should contain at least **1** query.
+        /// 
+        /// 
+        /// ### Download Asynchronous Batch Results
+        /// To download the async batch results you will issue a `GET` request to the batch download endpoint. This _download URL_ can be obtained from the `Location` header of a successful `POST` batch request and looks like the following:
+        /// 
+        /// ```
+        /// https://atlas.microsoft.com/batch/{batch-id}?api-version=1.0&amp;subscription-key={subscription-key}
+        /// ```
+        /// Here&apos;s the typical sequence of operations for downloading the batch results:
+        /// 1. Client sends a `GET` request using the _download URL_.
+        /// 2. The server will respond with one of the following:
+        /// 
+        ///     &gt; HTTP `202 Accepted` - Batch request was accepted but is still being processed. Please try again in some time.
+        /// 
+        ///     &gt; HTTP `200 OK` - Batch request successfully processed. The response body contains all the batch results.
+        /// 
+        /// 
+        /// 
+        /// ### Batch Response Model
+        /// The returned data content is similar for async and sync requests. When downloading the results of an async batch request, if the batch has finished processing, the response body contains the batch response. This batch response contains a `summary` component that indicates the `totalRequests` that were part of the original batch request and `successfulRequests`i.e. queries which were executed successfully. The batch response also includes a `batchItems` array which contains a response for each and every query in the batch request. The `batchItems` will contain the results in the exact same order the original queries were sent in the batch request. Each item in `batchItems` contains `statusCode` and `response` fields. Each `response` in `batchItems` is of one of the following types:
+        /// 
+        ///   - [`RouteDirectionsResponse`](https://docs.microsoft.com/en-us/rest/api/maps/route/getroutedirections#routedirectionsresponse) - If the query completed successfully.
+        /// 
+        ///   - `Error` - If the query failed. The response will contain a `code` and a `message` in this case.
+        /// 
+        /// 
+        /// Here&apos;s a sample Batch Response with 1 _successful_ and 1 _failed_ result:
+        /// 
+        /// 
+        /// ```json
+        /// {
+        ///     &quot;summary&quot;: {
+        ///         &quot;successfulRequests&quot;: 1,
+        ///         &quot;totalRequests&quot;: 2
+        ///     },
+        ///     &quot;batchItems&quot;: [
+        ///         {
+        ///             &quot;statusCode&quot;: 200,
+        ///             &quot;response&quot;: {
+        ///                 &quot;routes&quot;: [
+        ///                     {
+        ///                         &quot;summary&quot;: {
+        ///                             &quot;lengthInMeters&quot;: 1758,
+        ///                             &quot;travelTimeInSeconds&quot;: 387,
+        ///                             &quot;trafficDelayInSeconds&quot;: 0,
+        ///                             &quot;departureTime&quot;: &quot;2018-07-17T00:49:56+00:00&quot;,
+        ///                             &quot;arrivalTime&quot;: &quot;2018-07-17T00:56:22+00:00&quot;
+        ///                         },
+        ///                         &quot;legs&quot;: [
+        ///                             {
+        ///                                 &quot;summary&quot;: {
+        ///                                     &quot;lengthInMeters&quot;: 1758,
+        ///                                     &quot;travelTimeInSeconds&quot;: 387,
+        ///                                     &quot;trafficDelayInSeconds&quot;: 0,
+        ///                                     &quot;departureTime&quot;: &quot;2018-07-17T00:49:56+00:00&quot;,
+        ///                                     &quot;arrivalTime&quot;: &quot;2018-07-17T00:56:22+00:00&quot;
+        ///                                 },
+        ///                                 &quot;points&quot;: [
+        ///                                     {
+        ///                                         &quot;latitude&quot;: 47.62094,
+        ///                                         &quot;longitude&quot;: -122.34892
+        ///                                     },
+        ///                                     {
+        ///                                         &quot;latitude&quot;: 47.62094,
+        ///                                         &quot;longitude&quot;: -122.3485
+        ///                                     },
+        ///                                     {
+        ///                                         &quot;latitude&quot;: 47.62095,
+        ///                                         &quot;longitude&quot;: -122.3476
+        ///                                     }
+        ///                                 ]
+        ///                             }
+        ///                         ],
+        ///                         &quot;sections&quot;: [
+        ///                             {
+        ///                                 &quot;startPointIndex&quot;: 0,
+        ///                                 &quot;endPointIndex&quot;: 40,
+        ///                                 &quot;sectionType&quot;: &quot;TRAVEL_MODE&quot;,
+        ///                                 &quot;travelMode&quot;: &quot;bicycle&quot;
+        ///                             }
+        ///                         ]
+        ///                     }
+        ///                 ]
+        ///             }
+        ///         },
+        ///         {
+        ///             &quot;statusCode&quot;: 400,
+        ///             &quot;response&quot;:
+        ///             {
+        ///                 &quot;error&quot;:
+        ///                 {
+        ///                     &quot;code&quot;: &quot;400 BadRequest&quot;,
+        ///                     &quot;message&quot;: &quot;Bad request: one or more parameters were incorrectly specified or are mutually exclusive.&quot;
+        ///                 }
+        ///             }
+        ///         }
+        ///     ]
+        /// }
+        /// ```.
         /// </summary>
         /// <param name="format"> Desired format of the response. Only `json` format is supported. </param>
         /// <param name="postRouteDirectionsBatchRequestBody"> The list of route directions queries/requests to process. The list can contain  a max of 700 queries for async and 100 queries for sync version and must contain at least 1 query. </param>

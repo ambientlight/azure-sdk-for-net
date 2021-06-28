@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Description>Azure Maps Weather</Description>
-    <AssemblyTitle>Azure Maps Weather</AssemblyTitle>
+    <Description>Azure Maps Azure.Maps.Weather</Description>
+    <AssemblyTitle>Azure Maps Azure.Maps.Weather</AssemblyTitle>
     <Version>1.0.0-beta.1</Version>
-    <PackageTags>Azure;Azure Maps;Maps Weather</PackageTags>
+    <PackageTags>Azure;Azure Maps;Maps Azure.Maps.Weather</PackageTags>
     <TargetFrameworks>$(RequiredTargetFrameworks)</TargetFrameworks>
   <NoWarn>$(NoWarn);AZC0001;AZC0012</NoWarn></PropertyGroup>
 

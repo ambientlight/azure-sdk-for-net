@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Description>Azure Maps Traffic</Description>
-    <AssemblyTitle>Azure Maps Traffic</AssemblyTitle>
+    <Description>Azure Maps Azure.Maps.Traffic</Description>
+    <AssemblyTitle>Azure Maps Azure.Maps.Traffic</AssemblyTitle>
     <Version>1.0.0-beta.1</Version>
-    <PackageTags>Azure;Azure Maps;Maps Traffic</PackageTags>
+    <PackageTags>Azure;Azure Maps;Maps Azure.Maps.Traffic</PackageTags>
     <TargetFrameworks>$(RequiredTargetFrameworks)</TargetFrameworks>
   <NoWarn>$(NoWarn);AZC0001;AZC0012</NoWarn></PropertyGroup>
 

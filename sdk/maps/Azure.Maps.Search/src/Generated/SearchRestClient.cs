@@ -3469,6 +3469,7 @@ namespace Azure.Maps.Search
             var headers = new SearchPostSearchFuzzyBatchHeaders(message.Response);
             switch (message.Response.Status)
             {
+                case 200:
                 case 202:
                     return ResponseWithHeaders.FromValue(headers, message.Response);
                 default:
@@ -3644,6 +3645,7 @@ namespace Azure.Maps.Search
             var headers = new SearchPostSearchFuzzyBatchHeaders(message.Response);
             switch (message.Response.Status)
             {
+                case 200:
                 case 202:
                     return ResponseWithHeaders.FromValue(headers, message.Response);
                 default:
@@ -3827,7 +3829,7 @@ namespace Azure.Maps.Search
         /// <param name="format"> Batch id for querying the operation. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="format"/> is null. </exception>
-        public async Task<Response> GetSearchFuzzyBatchAsync(string format, CancellationToken cancellationToken = default)
+        public async Task<ResponseWithHeaders<SearchGetSearchFuzzyBatchHeaders>> GetSearchFuzzyBatchAsync(string format, CancellationToken cancellationToken = default)
         {
             if (format == null)
             {
@@ -3836,11 +3838,12 @@ namespace Azure.Maps.Search
 
             using var message = CreateGetSearchFuzzyBatchRequest(format);
             await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            var headers = new SearchGetSearchFuzzyBatchHeaders(message.Response);
             switch (message.Response.Status)
             {
                 case 200:
                 case 202:
-                    return message.Response;
+                    return ResponseWithHeaders.FromValue(headers, message.Response);
                 default:
                     throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
             }
@@ -4001,7 +4004,7 @@ namespace Azure.Maps.Search
         /// <param name="format"> Batch id for querying the operation. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="format"/> is null. </exception>
-        public Response GetSearchFuzzyBatch(string format, CancellationToken cancellationToken = default)
+        public ResponseWithHeaders<SearchGetSearchFuzzyBatchHeaders> GetSearchFuzzyBatch(string format, CancellationToken cancellationToken = default)
         {
             if (format == null)
             {
@@ -4010,720 +4013,7 @@ namespace Azure.Maps.Search
 
             using var message = CreateGetSearchFuzzyBatchRequest(format);
             _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 200:
-                case 202:
-                    return message.Response;
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreatePostSearchAddressBatchRequest(ResponseFormat format, BatchRequestBody searchAddressBatchRequestBody)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Post;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw("https://", false);
-            uri.AppendRaw(geography.ToString(), true);
-            uri.AppendRaw(".atlas.microsoft.com", false);
-            uri.AppendPath("/search/address/batch/", false);
-            uri.AppendPath(format.ToString(), true);
-            uri.AppendQuery("api-version", apiVersion, true);
-            request.Uri = uri;
-            if (xMsClientId != null)
-            {
-                request.Headers.Add("x-ms-client-id", xMsClientId);
-            }
-            request.Headers.Add("Accept", "application/json");
-            request.Headers.Add("Content-Type", "application/json");
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(searchAddressBatchRequestBody);
-            request.Content = content;
-            return message;
-        }
-
-        /// <summary>
-        /// **Search Address Batch API**
-        /// 
-        /// 
-        /// **Applies to**: S1 pricing tier.
-        /// 
-        /// 
-        /// 
-        /// The Search Address Batch API sends batches of queries to [Search Address API](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress) using just a single API call. You can call Search Address Batch API to run either asynchronously (async) or synchronously (sync). The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries.
-        /// ### Submit Synchronous Batch Request
-        /// The Synchronous API is recommended for lightweight batch requests. When the service receives a request, it will respond as soon as the batch items are calculated and there will be no possibility to retrieve the results later. The Synchronous API will return a timeout error (a 408 response) if the request takes longer than 60 seconds. The number of batch items is limited to **100** for this API.
-        /// ```
-        /// POST https://atlas.microsoft.com/search/address/batch/sync/json?api-version=1.0&amp;subscription-key={subscription-key}
-        /// ```
-        /// ### Submit Asynchronous Batch Request
-        /// The Asynchronous API is appropriate for processing big volumes of relatively complex search requests
-        /// - It allows the retrieval of results in a separate call (multiple downloads are possible).
-        /// - The asynchronous API is optimized for reliability and is not expected to run into a timeout.
-        /// - The number of batch items is limited to **10,000** for this API.
-        /// 
-        /// When you make a request by using async request, by default the service returns a 202 response code along a redirect URL in the Location field of the response header. This URL should be checked periodically until the response data or error information is available.
-        /// The asynchronous responses are stored for **14** days. The redirect URL returns a 404 response if used after the expiration period.
-        /// 
-        /// Please note that asynchronous batch request is a long-running request. Here&apos;s a typical sequence of operations:
-        /// 1. Client sends a Search Address Batch `POST` request to Azure Maps
-        /// 2. The server will respond with one of the following:
-        /// 
-        ///     &gt; HTTP `202 Accepted` - Batch request has been accepted.
-        /// 
-        ///     &gt; HTTP `Error` - There was an error processing your Batch request. This could either be a `400 Bad Request` or any other `Error` status code.
-        /// 
-        /// 3. If the batch request was accepted successfully, the `Location` header in the response contains the URL to download the results of the batch request.
-        ///     This status URI looks like following:
-        /// 
-        /// ```
-        ///     GET https://atlas.microsoft.com/batch/{batch-id}?api-version=1.0&amp;subscription-key={subscription-key}
-        /// ```
-        /// 4. Client issues a `GET` request on the _download URL_ obtained in Step 3 to download the batch results.
-        /// 
-        /// ### POST Body for Batch Request
-        /// To send the _search address_ queries you will use a `POST` request where the request body will contain the `batchItems` array in `json` format and the `Content-Type` header will be set to `application/json`. Here&apos;s a sample request body containing 5 _search address_ queries:
-        /// 
-        /// 
-        /// ```json
-        /// {
-        ///     &quot;batchItems&quot;: [
-        ///         {&quot;query&quot;: &quot;?query=400 Broad St, Seattle, WA 98109&amp;limit=3&quot;},
-        ///         {&quot;query&quot;: &quot;?query=One, Microsoft Way, Redmond, WA 98052&amp;limit=3&quot;},
-        ///         {&quot;query&quot;: &quot;?query=350 5th Ave, New York, NY 10118&amp;limit=1&quot;},
-        ///         {&quot;query&quot;: &quot;?query=Pike Pl, Seattle, WA 98101&amp;lat=47.610970&amp;lon=-122.342469&amp;radius=1000&quot;},
-        ///         {&quot;query&quot;: &quot;?query=Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France&amp;limit=1&quot;}
-        ///     ]
-        /// }
-        /// ```
-        /// 
-        /// A _search address_ query in a batch is just a partial URL _without_ the protocol, base URL, path, api-version and subscription-key. It can accept any of the supported _search address_ [URI parameters](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress#uri-parameters). The string values in the _search address_ query must be properly escaped (e.g. &quot; character should be escaped with \\ ) and it should also be properly URL-encoded.
-        /// 
-        /// 
-        /// The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries, and the batch should contain at least **1** query.
-        /// 
-        /// 
-        /// ### Download Asynchronous Batch Results
-        /// To download the async batch results you will issue a `GET` request to the batch download endpoint. This _download URL_ can be obtained from the `Location` header of a successful `POST` batch request and looks like the following:
-        /// 
-        /// ```
-        /// https://atlas.microsoft.com/batch/{batch-id}?api-version=1.0&amp;subscription-key={subscription-key}
-        /// ```
-        /// Here&apos;s the typical sequence of operations for downloading the batch results:
-        /// 1. Client sends a `GET` request using the _download URL_.
-        /// 2. The server will respond with one of the following:
-        /// 
-        ///     &gt; HTTP `202 Accepted` - Batch request was accepted but is still being processed. Please try again in some time.
-        /// 
-        ///     &gt; HTTP `200 OK` - Batch request successfully processed. The response body contains all the batch results.
-        /// 
-        /// 
-        /// 
-        /// ### Batch Response Model
-        /// The returned data content is similar for async and sync requests. When downloading the results of an async batch request, if the batch has finished processing, the response body contains the batch response. This batch response contains a `summary` component that indicates the `totalRequests` that were part of the original batch request and `successfulRequests`i.e. queries which were executed successfully. The batch response also includes a `batchItems` array which contains a response for each and every query in the batch request. The `batchItems` will contain the results in the exact same order the original queries were sent in the batch request. Each item in `batchItems` contains `statusCode` and `response` fields. Each `response` in `batchItems` is of one of the following types:
-        /// 
-        ///   - [`SearchCommonResponse`](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress#SearchCommonResponse) - If the query completed successfully.
-        /// 
-        ///   - `Error` - If the query failed. The response will contain a `code` and a `message` in this case.
-        /// 
-        /// 
-        /// Here&apos;s a sample Batch Response with 2 _successful_ and 1 _failed_ result:
-        /// 
-        /// 
-        /// ```json
-        /// {
-        ///     &quot;summary&quot;: {
-        ///         &quot;successfulRequests&quot;: 2,
-        ///         &quot;totalRequests&quot;: 3
-        ///     },
-        ///     &quot;batchItems&quot;: [
-        ///         {
-        ///             &quot;statusCode&quot;: 200,
-        ///             &quot;response&quot;:
-        ///             {
-        ///                 &quot;summary&quot;: {
-        ///                     &quot;query&quot;: &quot;one microsoft way redmond wa 98052&quot;
-        ///                 },
-        ///                 &quot;results&quot;: [
-        ///                     {
-        ///                         &quot;position&quot;: {
-        ///                             &quot;lat&quot;: 47.63989,
-        ///                             &quot;lon&quot;: -122.12509
-        ///                         }
-        ///                     }
-        ///                 ]
-        ///             }
-        ///         },
-        ///         {
-        ///             &quot;statusCode&quot;: 200,
-        ///             &quot;response&quot;:
-        ///             {
-        ///                 &quot;summary&quot;: {
-        ///                     &quot;query&quot;: &quot;pike pl seattle wa 98101&quot;
-        ///                 },
-        ///                 &quot;results&quot;: [
-        ///                     {
-        ///                         &quot;position&quot;: {
-        ///                             &quot;lat&quot;: 47.60963,
-        ///                             &quot;lon&quot;: -122.34215
-        ///                         }
-        ///                     }
-        ///                 ]
-        ///             }
-        ///         },
-        ///         {
-        ///             &quot;statusCode&quot;: 400,
-        ///             &quot;response&quot;:
-        ///             {
-        ///                 &quot;error&quot;:
-        ///                 {
-        ///                     &quot;code&quot;: &quot;400 BadRequest&quot;,
-        ///                     &quot;message&quot;: &quot;Bad request: one or more parameters were incorrectly specified or are mutually exclusive.&quot;
-        ///                 }
-        ///             }
-        ///         }
-        ///     ]
-        /// }
-        /// ```.
-        /// </summary>
-        /// <param name="format"> Desired format of the response. Only `json` format is supported. </param>
-        /// <param name="searchAddressBatchRequestBody"> The list of address geocoding queries/requests to process. The list can contain  a max of 10,000 queries and must contain at least 1 query. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="searchAddressBatchRequestBody"/> is null. </exception>
-        public async Task<ResponseWithHeaders<SearchPostSearchAddressBatchHeaders>> PostSearchAddressBatchAsync(ResponseFormat format, BatchRequestBody searchAddressBatchRequestBody, CancellationToken cancellationToken = default)
-        {
-            if (searchAddressBatchRequestBody == null)
-            {
-                throw new ArgumentNullException(nameof(searchAddressBatchRequestBody));
-            }
-
-            using var message = CreatePostSearchAddressBatchRequest(format, searchAddressBatchRequestBody);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            var headers = new SearchPostSearchAddressBatchHeaders(message.Response);
-            switch (message.Response.Status)
-            {
-                case 202:
-                    return ResponseWithHeaders.FromValue(headers, message.Response);
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary>
-        /// **Search Address Batch API**
-        /// 
-        /// 
-        /// **Applies to**: S1 pricing tier.
-        /// 
-        /// 
-        /// 
-        /// The Search Address Batch API sends batches of queries to [Search Address API](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress) using just a single API call. You can call Search Address Batch API to run either asynchronously (async) or synchronously (sync). The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries.
-        /// ### Submit Synchronous Batch Request
-        /// The Synchronous API is recommended for lightweight batch requests. When the service receives a request, it will respond as soon as the batch items are calculated and there will be no possibility to retrieve the results later. The Synchronous API will return a timeout error (a 408 response) if the request takes longer than 60 seconds. The number of batch items is limited to **100** for this API.
-        /// ```
-        /// POST https://atlas.microsoft.com/search/address/batch/sync/json?api-version=1.0&amp;subscription-key={subscription-key}
-        /// ```
-        /// ### Submit Asynchronous Batch Request
-        /// The Asynchronous API is appropriate for processing big volumes of relatively complex search requests
-        /// - It allows the retrieval of results in a separate call (multiple downloads are possible).
-        /// - The asynchronous API is optimized for reliability and is not expected to run into a timeout.
-        /// - The number of batch items is limited to **10,000** for this API.
-        /// 
-        /// When you make a request by using async request, by default the service returns a 202 response code along a redirect URL in the Location field of the response header. This URL should be checked periodically until the response data or error information is available.
-        /// The asynchronous responses are stored for **14** days. The redirect URL returns a 404 response if used after the expiration period.
-        /// 
-        /// Please note that asynchronous batch request is a long-running request. Here&apos;s a typical sequence of operations:
-        /// 1. Client sends a Search Address Batch `POST` request to Azure Maps
-        /// 2. The server will respond with one of the following:
-        /// 
-        ///     &gt; HTTP `202 Accepted` - Batch request has been accepted.
-        /// 
-        ///     &gt; HTTP `Error` - There was an error processing your Batch request. This could either be a `400 Bad Request` or any other `Error` status code.
-        /// 
-        /// 3. If the batch request was accepted successfully, the `Location` header in the response contains the URL to download the results of the batch request.
-        ///     This status URI looks like following:
-        /// 
-        /// ```
-        ///     GET https://atlas.microsoft.com/batch/{batch-id}?api-version=1.0&amp;subscription-key={subscription-key}
-        /// ```
-        /// 4. Client issues a `GET` request on the _download URL_ obtained in Step 3 to download the batch results.
-        /// 
-        /// ### POST Body for Batch Request
-        /// To send the _search address_ queries you will use a `POST` request where the request body will contain the `batchItems` array in `json` format and the `Content-Type` header will be set to `application/json`. Here&apos;s a sample request body containing 5 _search address_ queries:
-        /// 
-        /// 
-        /// ```json
-        /// {
-        ///     &quot;batchItems&quot;: [
-        ///         {&quot;query&quot;: &quot;?query=400 Broad St, Seattle, WA 98109&amp;limit=3&quot;},
-        ///         {&quot;query&quot;: &quot;?query=One, Microsoft Way, Redmond, WA 98052&amp;limit=3&quot;},
-        ///         {&quot;query&quot;: &quot;?query=350 5th Ave, New York, NY 10118&amp;limit=1&quot;},
-        ///         {&quot;query&quot;: &quot;?query=Pike Pl, Seattle, WA 98101&amp;lat=47.610970&amp;lon=-122.342469&amp;radius=1000&quot;},
-        ///         {&quot;query&quot;: &quot;?query=Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France&amp;limit=1&quot;}
-        ///     ]
-        /// }
-        /// ```
-        /// 
-        /// A _search address_ query in a batch is just a partial URL _without_ the protocol, base URL, path, api-version and subscription-key. It can accept any of the supported _search address_ [URI parameters](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress#uri-parameters). The string values in the _search address_ query must be properly escaped (e.g. &quot; character should be escaped with \\ ) and it should also be properly URL-encoded.
-        /// 
-        /// 
-        /// The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries, and the batch should contain at least **1** query.
-        /// 
-        /// 
-        /// ### Download Asynchronous Batch Results
-        /// To download the async batch results you will issue a `GET` request to the batch download endpoint. This _download URL_ can be obtained from the `Location` header of a successful `POST` batch request and looks like the following:
-        /// 
-        /// ```
-        /// https://atlas.microsoft.com/batch/{batch-id}?api-version=1.0&amp;subscription-key={subscription-key}
-        /// ```
-        /// Here&apos;s the typical sequence of operations for downloading the batch results:
-        /// 1. Client sends a `GET` request using the _download URL_.
-        /// 2. The server will respond with one of the following:
-        /// 
-        ///     &gt; HTTP `202 Accepted` - Batch request was accepted but is still being processed. Please try again in some time.
-        /// 
-        ///     &gt; HTTP `200 OK` - Batch request successfully processed. The response body contains all the batch results.
-        /// 
-        /// 
-        /// 
-        /// ### Batch Response Model
-        /// The returned data content is similar for async and sync requests. When downloading the results of an async batch request, if the batch has finished processing, the response body contains the batch response. This batch response contains a `summary` component that indicates the `totalRequests` that were part of the original batch request and `successfulRequests`i.e. queries which were executed successfully. The batch response also includes a `batchItems` array which contains a response for each and every query in the batch request. The `batchItems` will contain the results in the exact same order the original queries were sent in the batch request. Each item in `batchItems` contains `statusCode` and `response` fields. Each `response` in `batchItems` is of one of the following types:
-        /// 
-        ///   - [`SearchCommonResponse`](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress#SearchCommonResponse) - If the query completed successfully.
-        /// 
-        ///   - `Error` - If the query failed. The response will contain a `code` and a `message` in this case.
-        /// 
-        /// 
-        /// Here&apos;s a sample Batch Response with 2 _successful_ and 1 _failed_ result:
-        /// 
-        /// 
-        /// ```json
-        /// {
-        ///     &quot;summary&quot;: {
-        ///         &quot;successfulRequests&quot;: 2,
-        ///         &quot;totalRequests&quot;: 3
-        ///     },
-        ///     &quot;batchItems&quot;: [
-        ///         {
-        ///             &quot;statusCode&quot;: 200,
-        ///             &quot;response&quot;:
-        ///             {
-        ///                 &quot;summary&quot;: {
-        ///                     &quot;query&quot;: &quot;one microsoft way redmond wa 98052&quot;
-        ///                 },
-        ///                 &quot;results&quot;: [
-        ///                     {
-        ///                         &quot;position&quot;: {
-        ///                             &quot;lat&quot;: 47.63989,
-        ///                             &quot;lon&quot;: -122.12509
-        ///                         }
-        ///                     }
-        ///                 ]
-        ///             }
-        ///         },
-        ///         {
-        ///             &quot;statusCode&quot;: 200,
-        ///             &quot;response&quot;:
-        ///             {
-        ///                 &quot;summary&quot;: {
-        ///                     &quot;query&quot;: &quot;pike pl seattle wa 98101&quot;
-        ///                 },
-        ///                 &quot;results&quot;: [
-        ///                     {
-        ///                         &quot;position&quot;: {
-        ///                             &quot;lat&quot;: 47.60963,
-        ///                             &quot;lon&quot;: -122.34215
-        ///                         }
-        ///                     }
-        ///                 ]
-        ///             }
-        ///         },
-        ///         {
-        ///             &quot;statusCode&quot;: 400,
-        ///             &quot;response&quot;:
-        ///             {
-        ///                 &quot;error&quot;:
-        ///                 {
-        ///                     &quot;code&quot;: &quot;400 BadRequest&quot;,
-        ///                     &quot;message&quot;: &quot;Bad request: one or more parameters were incorrectly specified or are mutually exclusive.&quot;
-        ///                 }
-        ///             }
-        ///         }
-        ///     ]
-        /// }
-        /// ```.
-        /// </summary>
-        /// <param name="format"> Desired format of the response. Only `json` format is supported. </param>
-        /// <param name="searchAddressBatchRequestBody"> The list of address geocoding queries/requests to process. The list can contain  a max of 10,000 queries and must contain at least 1 query. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="searchAddressBatchRequestBody"/> is null. </exception>
-        public ResponseWithHeaders<SearchPostSearchAddressBatchHeaders> PostSearchAddressBatch(ResponseFormat format, BatchRequestBody searchAddressBatchRequestBody, CancellationToken cancellationToken = default)
-        {
-            if (searchAddressBatchRequestBody == null)
-            {
-                throw new ArgumentNullException(nameof(searchAddressBatchRequestBody));
-            }
-
-            using var message = CreatePostSearchAddressBatchRequest(format, searchAddressBatchRequestBody);
-            _pipeline.Send(message, cancellationToken);
-            var headers = new SearchPostSearchAddressBatchHeaders(message.Response);
-            switch (message.Response.Status)
-            {
-                case 202:
-                    return ResponseWithHeaders.FromValue(headers, message.Response);
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreateGetSearchAddressBatchRequest(string format)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw("https://", false);
-            uri.AppendRaw(geography.ToString(), true);
-            uri.AppendRaw(".atlas.microsoft.com", false);
-            uri.AppendPath("/search/address/batch/", false);
-            uri.AppendPath(format, true);
-            uri.AppendQuery("api-version", apiVersion, true);
-            request.Uri = uri;
-            if (xMsClientId != null)
-            {
-                request.Headers.Add("x-ms-client-id", xMsClientId);
-            }
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        /// <summary>
-        /// **Search Address Batch API**
-        /// 
-        /// 
-        /// **Applies to**: S1 pricing tier.
-        /// 
-        /// 
-        /// 
-        /// The Search Address Batch API sends batches of queries to [Search Address API](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress) using just a single API call. You can call Search Address Batch API to run either asynchronously (async) or synchronously (sync). The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries.
-        /// ### Submit Synchronous Batch Request
-        /// The Synchronous API is recommended for lightweight batch requests. When the service receives a request, it will respond as soon as the batch items are calculated and there will be no possibility to retrieve the results later. The Synchronous API will return a timeout error (a 408 response) if the request takes longer than 60 seconds. The number of batch items is limited to **100** for this API.
-        /// ```
-        /// POST https://atlas.microsoft.com/search/address/batch/sync/json?api-version=1.0&amp;subscription-key={subscription-key}
-        /// ```
-        /// ### Submit Asynchronous Batch Request
-        /// The Asynchronous API is appropriate for processing big volumes of relatively complex search requests
-        /// - It allows the retrieval of results in a separate call (multiple downloads are possible).
-        /// - The asynchronous API is optimized for reliability and is not expected to run into a timeout.
-        /// - The number of batch items is limited to **10,000** for this API.
-        /// 
-        /// When you make a request by using async request, by default the service returns a 202 response code along a redirect URL in the Location field of the response header. This URL should be checked periodically until the response data or error information is available.
-        /// The asynchronous responses are stored for **14** days. The redirect URL returns a 404 response if used after the expiration period.
-        /// 
-        /// Please note that asynchronous batch request is a long-running request. Here&apos;s a typical sequence of operations:
-        /// 1. Client sends a Search Address Batch `POST` request to Azure Maps
-        /// 2. The server will respond with one of the following:
-        /// 
-        ///     &gt; HTTP `202 Accepted` - Batch request has been accepted.
-        /// 
-        ///     &gt; HTTP `Error` - There was an error processing your Batch request. This could either be a `400 Bad Request` or any other `Error` status code.
-        /// 
-        /// 3. If the batch request was accepted successfully, the `Location` header in the response contains the URL to download the results of the batch request.
-        ///     This status URI looks like following:
-        /// 
-        /// ```
-        ///     GET https://atlas.microsoft.com/batch/{batch-id}?api-version=1.0&amp;subscription-key={subscription-key}
-        /// ```
-        /// 4. Client issues a `GET` request on the _download URL_ obtained in Step 3 to download the batch results.
-        /// 
-        /// ### POST Body for Batch Request
-        /// To send the _search address_ queries you will use a `POST` request where the request body will contain the `batchItems` array in `json` format and the `Content-Type` header will be set to `application/json`. Here&apos;s a sample request body containing 5 _search address_ queries:
-        /// 
-        /// 
-        /// ```json
-        /// {
-        ///     &quot;batchItems&quot;: [
-        ///         {&quot;query&quot;: &quot;?query=400 Broad St, Seattle, WA 98109&amp;limit=3&quot;},
-        ///         {&quot;query&quot;: &quot;?query=One, Microsoft Way, Redmond, WA 98052&amp;limit=3&quot;},
-        ///         {&quot;query&quot;: &quot;?query=350 5th Ave, New York, NY 10118&amp;limit=1&quot;},
-        ///         {&quot;query&quot;: &quot;?query=Pike Pl, Seattle, WA 98101&amp;lat=47.610970&amp;lon=-122.342469&amp;radius=1000&quot;},
-        ///         {&quot;query&quot;: &quot;?query=Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France&amp;limit=1&quot;}
-        ///     ]
-        /// }
-        /// ```
-        /// 
-        /// A _search address_ query in a batch is just a partial URL _without_ the protocol, base URL, path, api-version and subscription-key. It can accept any of the supported _search address_ [URI parameters](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress#uri-parameters). The string values in the _search address_ query must be properly escaped (e.g. &quot; character should be escaped with \\ ) and it should also be properly URL-encoded.
-        /// 
-        /// 
-        /// The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries, and the batch should contain at least **1** query.
-        /// 
-        /// 
-        /// ### Download Asynchronous Batch Results
-        /// To download the async batch results you will issue a `GET` request to the batch download endpoint. This _download URL_ can be obtained from the `Location` header of a successful `POST` batch request and looks like the following:
-        /// 
-        /// ```
-        /// https://atlas.microsoft.com/batch/{batch-id}?api-version=1.0&amp;subscription-key={subscription-key}
-        /// ```
-        /// Here&apos;s the typical sequence of operations for downloading the batch results:
-        /// 1. Client sends a `GET` request using the _download URL_.
-        /// 2. The server will respond with one of the following:
-        /// 
-        ///     &gt; HTTP `202 Accepted` - Batch request was accepted but is still being processed. Please try again in some time.
-        /// 
-        ///     &gt; HTTP `200 OK` - Batch request successfully processed. The response body contains all the batch results.
-        /// 
-        /// 
-        /// 
-        /// ### Batch Response Model
-        /// The returned data content is similar for async and sync requests. When downloading the results of an async batch request, if the batch has finished processing, the response body contains the batch response. This batch response contains a `summary` component that indicates the `totalRequests` that were part of the original batch request and `successfulRequests`i.e. queries which were executed successfully. The batch response also includes a `batchItems` array which contains a response for each and every query in the batch request. The `batchItems` will contain the results in the exact same order the original queries were sent in the batch request. Each item in `batchItems` contains `statusCode` and `response` fields. Each `response` in `batchItems` is of one of the following types:
-        /// 
-        ///   - [`SearchCommonResponse`](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress#SearchCommonResponse) - If the query completed successfully.
-        /// 
-        ///   - `Error` - If the query failed. The response will contain a `code` and a `message` in this case.
-        /// 
-        /// 
-        /// Here&apos;s a sample Batch Response with 2 _successful_ and 1 _failed_ result:
-        /// 
-        /// 
-        /// ```json
-        /// {
-        ///     &quot;summary&quot;: {
-        ///         &quot;successfulRequests&quot;: 2,
-        ///         &quot;totalRequests&quot;: 3
-        ///     },
-        ///     &quot;batchItems&quot;: [
-        ///         {
-        ///             &quot;statusCode&quot;: 200,
-        ///             &quot;response&quot;:
-        ///             {
-        ///                 &quot;summary&quot;: {
-        ///                     &quot;query&quot;: &quot;one microsoft way redmond wa 98052&quot;
-        ///                 },
-        ///                 &quot;results&quot;: [
-        ///                     {
-        ///                         &quot;position&quot;: {
-        ///                             &quot;lat&quot;: 47.63989,
-        ///                             &quot;lon&quot;: -122.12509
-        ///                         }
-        ///                     }
-        ///                 ]
-        ///             }
-        ///         },
-        ///         {
-        ///             &quot;statusCode&quot;: 200,
-        ///             &quot;response&quot;:
-        ///             {
-        ///                 &quot;summary&quot;: {
-        ///                     &quot;query&quot;: &quot;pike pl seattle wa 98101&quot;
-        ///                 },
-        ///                 &quot;results&quot;: [
-        ///                     {
-        ///                         &quot;position&quot;: {
-        ///                             &quot;lat&quot;: 47.60963,
-        ///                             &quot;lon&quot;: -122.34215
-        ///                         }
-        ///                     }
-        ///                 ]
-        ///             }
-        ///         },
-        ///         {
-        ///             &quot;statusCode&quot;: 400,
-        ///             &quot;response&quot;:
-        ///             {
-        ///                 &quot;error&quot;:
-        ///                 {
-        ///                     &quot;code&quot;: &quot;400 BadRequest&quot;,
-        ///                     &quot;message&quot;: &quot;Bad request: one or more parameters were incorrectly specified or are mutually exclusive.&quot;
-        ///                 }
-        ///             }
-        ///         }
-        ///     ]
-        /// }
-        /// ```.
-        /// </summary>
-        /// <param name="format"> Batch id for querying the operation. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="format"/> is null. </exception>
-        public async Task<ResponseWithHeaders<SearchGetSearchAddressBatchHeaders>> GetSearchAddressBatchAsync(string format, CancellationToken cancellationToken = default)
-        {
-            if (format == null)
-            {
-                throw new ArgumentNullException(nameof(format));
-            }
-
-            using var message = CreateGetSearchAddressBatchRequest(format);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            var headers = new SearchGetSearchAddressBatchHeaders(message.Response);
-            switch (message.Response.Status)
-            {
-                case 200:
-                case 202:
-                    return ResponseWithHeaders.FromValue(headers, message.Response);
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary>
-        /// **Search Address Batch API**
-        /// 
-        /// 
-        /// **Applies to**: S1 pricing tier.
-        /// 
-        /// 
-        /// 
-        /// The Search Address Batch API sends batches of queries to [Search Address API](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress) using just a single API call. You can call Search Address Batch API to run either asynchronously (async) or synchronously (sync). The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries.
-        /// ### Submit Synchronous Batch Request
-        /// The Synchronous API is recommended for lightweight batch requests. When the service receives a request, it will respond as soon as the batch items are calculated and there will be no possibility to retrieve the results later. The Synchronous API will return a timeout error (a 408 response) if the request takes longer than 60 seconds. The number of batch items is limited to **100** for this API.
-        /// ```
-        /// POST https://atlas.microsoft.com/search/address/batch/sync/json?api-version=1.0&amp;subscription-key={subscription-key}
-        /// ```
-        /// ### Submit Asynchronous Batch Request
-        /// The Asynchronous API is appropriate for processing big volumes of relatively complex search requests
-        /// - It allows the retrieval of results in a separate call (multiple downloads are possible).
-        /// - The asynchronous API is optimized for reliability and is not expected to run into a timeout.
-        /// - The number of batch items is limited to **10,000** for this API.
-        /// 
-        /// When you make a request by using async request, by default the service returns a 202 response code along a redirect URL in the Location field of the response header. This URL should be checked periodically until the response data or error information is available.
-        /// The asynchronous responses are stored for **14** days. The redirect URL returns a 404 response if used after the expiration period.
-        /// 
-        /// Please note that asynchronous batch request is a long-running request. Here&apos;s a typical sequence of operations:
-        /// 1. Client sends a Search Address Batch `POST` request to Azure Maps
-        /// 2. The server will respond with one of the following:
-        /// 
-        ///     &gt; HTTP `202 Accepted` - Batch request has been accepted.
-        /// 
-        ///     &gt; HTTP `Error` - There was an error processing your Batch request. This could either be a `400 Bad Request` or any other `Error` status code.
-        /// 
-        /// 3. If the batch request was accepted successfully, the `Location` header in the response contains the URL to download the results of the batch request.
-        ///     This status URI looks like following:
-        /// 
-        /// ```
-        ///     GET https://atlas.microsoft.com/batch/{batch-id}?api-version=1.0&amp;subscription-key={subscription-key}
-        /// ```
-        /// 4. Client issues a `GET` request on the _download URL_ obtained in Step 3 to download the batch results.
-        /// 
-        /// ### POST Body for Batch Request
-        /// To send the _search address_ queries you will use a `POST` request where the request body will contain the `batchItems` array in `json` format and the `Content-Type` header will be set to `application/json`. Here&apos;s a sample request body containing 5 _search address_ queries:
-        /// 
-        /// 
-        /// ```json
-        /// {
-        ///     &quot;batchItems&quot;: [
-        ///         {&quot;query&quot;: &quot;?query=400 Broad St, Seattle, WA 98109&amp;limit=3&quot;},
-        ///         {&quot;query&quot;: &quot;?query=One, Microsoft Way, Redmond, WA 98052&amp;limit=3&quot;},
-        ///         {&quot;query&quot;: &quot;?query=350 5th Ave, New York, NY 10118&amp;limit=1&quot;},
-        ///         {&quot;query&quot;: &quot;?query=Pike Pl, Seattle, WA 98101&amp;lat=47.610970&amp;lon=-122.342469&amp;radius=1000&quot;},
-        ///         {&quot;query&quot;: &quot;?query=Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France&amp;limit=1&quot;}
-        ///     ]
-        /// }
-        /// ```
-        /// 
-        /// A _search address_ query in a batch is just a partial URL _without_ the protocol, base URL, path, api-version and subscription-key. It can accept any of the supported _search address_ [URI parameters](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress#uri-parameters). The string values in the _search address_ query must be properly escaped (e.g. &quot; character should be escaped with \\ ) and it should also be properly URL-encoded.
-        /// 
-        /// 
-        /// The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries, and the batch should contain at least **1** query.
-        /// 
-        /// 
-        /// ### Download Asynchronous Batch Results
-        /// To download the async batch results you will issue a `GET` request to the batch download endpoint. This _download URL_ can be obtained from the `Location` header of a successful `POST` batch request and looks like the following:
-        /// 
-        /// ```
-        /// https://atlas.microsoft.com/batch/{batch-id}?api-version=1.0&amp;subscription-key={subscription-key}
-        /// ```
-        /// Here&apos;s the typical sequence of operations for downloading the batch results:
-        /// 1. Client sends a `GET` request using the _download URL_.
-        /// 2. The server will respond with one of the following:
-        /// 
-        ///     &gt; HTTP `202 Accepted` - Batch request was accepted but is still being processed. Please try again in some time.
-        /// 
-        ///     &gt; HTTP `200 OK` - Batch request successfully processed. The response body contains all the batch results.
-        /// 
-        /// 
-        /// 
-        /// ### Batch Response Model
-        /// The returned data content is similar for async and sync requests. When downloading the results of an async batch request, if the batch has finished processing, the response body contains the batch response. This batch response contains a `summary` component that indicates the `totalRequests` that were part of the original batch request and `successfulRequests`i.e. queries which were executed successfully. The batch response also includes a `batchItems` array which contains a response for each and every query in the batch request. The `batchItems` will contain the results in the exact same order the original queries were sent in the batch request. Each item in `batchItems` contains `statusCode` and `response` fields. Each `response` in `batchItems` is of one of the following types:
-        /// 
-        ///   - [`SearchCommonResponse`](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress#SearchCommonResponse) - If the query completed successfully.
-        /// 
-        ///   - `Error` - If the query failed. The response will contain a `code` and a `message` in this case.
-        /// 
-        /// 
-        /// Here&apos;s a sample Batch Response with 2 _successful_ and 1 _failed_ result:
-        /// 
-        /// 
-        /// ```json
-        /// {
-        ///     &quot;summary&quot;: {
-        ///         &quot;successfulRequests&quot;: 2,
-        ///         &quot;totalRequests&quot;: 3
-        ///     },
-        ///     &quot;batchItems&quot;: [
-        ///         {
-        ///             &quot;statusCode&quot;: 200,
-        ///             &quot;response&quot;:
-        ///             {
-        ///                 &quot;summary&quot;: {
-        ///                     &quot;query&quot;: &quot;one microsoft way redmond wa 98052&quot;
-        ///                 },
-        ///                 &quot;results&quot;: [
-        ///                     {
-        ///                         &quot;position&quot;: {
-        ///                             &quot;lat&quot;: 47.63989,
-        ///                             &quot;lon&quot;: -122.12509
-        ///                         }
-        ///                     }
-        ///                 ]
-        ///             }
-        ///         },
-        ///         {
-        ///             &quot;statusCode&quot;: 200,
-        ///             &quot;response&quot;:
-        ///             {
-        ///                 &quot;summary&quot;: {
-        ///                     &quot;query&quot;: &quot;pike pl seattle wa 98101&quot;
-        ///                 },
-        ///                 &quot;results&quot;: [
-        ///                     {
-        ///                         &quot;position&quot;: {
-        ///                             &quot;lat&quot;: 47.60963,
-        ///                             &quot;lon&quot;: -122.34215
-        ///                         }
-        ///                     }
-        ///                 ]
-        ///             }
-        ///         },
-        ///         {
-        ///             &quot;statusCode&quot;: 400,
-        ///             &quot;response&quot;:
-        ///             {
-        ///                 &quot;error&quot;:
-        ///                 {
-        ///                     &quot;code&quot;: &quot;400 BadRequest&quot;,
-        ///                     &quot;message&quot;: &quot;Bad request: one or more parameters were incorrectly specified or are mutually exclusive.&quot;
-        ///                 }
-        ///             }
-        ///         }
-        ///     ]
-        /// }
-        /// ```.
-        /// </summary>
-        /// <param name="format"> Batch id for querying the operation. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="format"/> is null. </exception>
-        public ResponseWithHeaders<SearchGetSearchAddressBatchHeaders> GetSearchAddressBatch(string format, CancellationToken cancellationToken = default)
-        {
-            if (format == null)
-            {
-                throw new ArgumentNullException(nameof(format));
-            }
-
-            using var message = CreateGetSearchAddressBatchRequest(format);
-            _pipeline.Send(message, cancellationToken);
-            var headers = new SearchGetSearchAddressBatchHeaders(message.Response);
+            var headers = new SearchGetSearchFuzzyBatchHeaders(message.Response);
             switch (message.Response.Status)
             {
                 case 200:
@@ -5101,7 +4391,7 @@ namespace Azure.Maps.Search
             }
         }
 
-        internal HttpMessage CreatePostSearchAddressReverseBatchRequest(ResponseFormat format, BatchRequestBody searchAddressReverseBatchRequestBody)
+        internal HttpMessage CreatePostSearchAddressBatchRequest(ResponseFormat format, BatchRequestBody searchAddressBatchRequestBody)
         {
             var message = _pipeline.CreateMessage();
             var request = message.Request;
@@ -5110,7 +4400,7 @@ namespace Azure.Maps.Search
             uri.AppendRaw("https://", false);
             uri.AppendRaw(geography.ToString(), true);
             uri.AppendRaw(".atlas.microsoft.com", false);
-            uri.AppendPath("/search/address/reverse/batch/", false);
+            uri.AppendPath("/search/address/batch/", false);
             uri.AppendPath(format.ToString(), true);
             uri.AppendQuery("api-version", apiVersion, true);
             request.Uri = uri;
@@ -5121,24 +4411,24 @@ namespace Azure.Maps.Search
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("Content-Type", "application/json");
             var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(searchAddressReverseBatchRequestBody);
+            content.JsonWriter.WriteObjectValue(searchAddressBatchRequestBody);
             request.Content = content;
             return message;
         }
 
         /// <summary>
-        /// **Search Address Reverse Batch API**
+        /// **Search Address Batch API**
         /// 
         /// 
         /// **Applies to**: S1 pricing tier.
         /// 
         /// 
         /// 
-        /// The Search Address Batch API sends batches of queries to [Search Address Reverse API](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse) using just a single API call. You can call Search Address Reverse Batch API to run either asynchronously (async) or synchronously (sync). The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries.
+        /// The Search Address Batch API sends batches of queries to [Search Address API](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress) using just a single API call. You can call Search Address Batch API to run either asynchronously (async) or synchronously (sync). The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries.
         /// ### Submit Synchronous Batch Request
         /// The Synchronous API is recommended for lightweight batch requests. When the service receives a request, it will respond as soon as the batch items are calculated and there will be no possibility to retrieve the results later. The Synchronous API will return a timeout error (a 408 response) if the request takes longer than 60 seconds. The number of batch items is limited to **100** for this API.
         /// ```
-        /// POST https://atlas.microsoft.com/search/address/reverse/batch/sync/json?api-version=1.0&amp;subscription-key={subscription-key}
+        /// POST https://atlas.microsoft.com/search/address/batch/sync/json?api-version=1.0&amp;subscription-key={subscription-key}
         /// ```
         /// ### Submit Asynchronous Batch Request
         /// The Asynchronous API is appropriate for processing big volumes of relatively complex search requests
@@ -5166,22 +4456,22 @@ namespace Azure.Maps.Search
         /// 4. Client issues a `GET` request on the _download URL_ obtained in Step 3 to download the batch results.
         /// 
         /// ### POST Body for Batch Request
-        /// To send the _search address reverse_ queries you will use a `POST` request where the request body will contain the `batchItems` array in `json` format and the `Content-Type` header will be set to `application/json`. Here&apos;s a sample request body containing 5 _search address reverse_ queries:
+        /// To send the _search address_ queries you will use a `POST` request where the request body will contain the `batchItems` array in `json` format and the `Content-Type` header will be set to `application/json`. Here&apos;s a sample request body containing 5 _search address_ queries:
         /// 
         /// 
         /// ```json
         /// {
         ///     &quot;batchItems&quot;: [
-        ///         {&quot;query&quot;: &quot;?query=48.858561,2.294911&quot;},
-        ///         {&quot;query&quot;: &quot;?query=47.639765,-122.127896&amp;radius=5000&amp;limit=2&quot;},
-        ///         {&quot;query&quot;: &quot;?query=47.621028,-122.348170&quot;},
-        ///         {&quot;query&quot;: &quot;?query=43.722990,10.396695&quot;},
-        ///         {&quot;query&quot;: &quot;?query=40.750958,-73.982336&quot;}
+        ///         {&quot;query&quot;: &quot;?query=400 Broad St, Seattle, WA 98109&amp;limit=3&quot;},
+        ///         {&quot;query&quot;: &quot;?query=One, Microsoft Way, Redmond, WA 98052&amp;limit=3&quot;},
+        ///         {&quot;query&quot;: &quot;?query=350 5th Ave, New York, NY 10118&amp;limit=1&quot;},
+        ///         {&quot;query&quot;: &quot;?query=Pike Pl, Seattle, WA 98101&amp;lat=47.610970&amp;lon=-122.342469&amp;radius=1000&quot;},
+        ///         {&quot;query&quot;: &quot;?query=Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France&amp;limit=1&quot;}
         ///     ]
         /// }
         /// ```
         /// 
-        /// A _search address reverse_ query in a batch is just a partial URL _without_ the protocol, base URL, path, api-version and subscription-key. It can accept any of the supported _search address reverse_ [URI parameters](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse#uri-parameters). The string values in the _search address reverse_ query must be properly escaped (e.g. &quot; character should be escaped with \\ ) and it should also be properly URL-encoded.
+        /// A _search address_ query in a batch is just a partial URL _without_ the protocol, base URL, path, api-version and subscription-key. It can accept any of the supported _search address_ [URI parameters](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress#uri-parameters). The string values in the _search address_ query must be properly escaped (e.g. &quot; character should be escaped with \\ ) and it should also be properly URL-encoded.
         /// 
         /// 
         /// The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries, and the batch should contain at least **1** query.
@@ -5206,7 +4496,7 @@ namespace Azure.Maps.Search
         /// ### Batch Response Model
         /// The returned data content is similar for async and sync requests. When downloading the results of an async batch request, if the batch has finished processing, the response body contains the batch response. This batch response contains a `summary` component that indicates the `totalRequests` that were part of the original batch request and `successfulRequests`i.e. queries which were executed successfully. The batch response also includes a `batchItems` array which contains a response for each and every query in the batch request. The `batchItems` will contain the results in the exact same order the original queries were sent in the batch request. Each item in `batchItems` contains `statusCode` and `response` fields. Each `response` in `batchItems` is of one of the following types:
         /// 
-        ///   - [`SearchAddressReverseResponse`](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse#searchaddressreverseresponse) - If the query completed successfully.
+        ///   - [`SearchCommonResponse`](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress#SearchCommonResponse) - If the query completed successfully.
         /// 
         ///   - `Error` - If the query failed. The response will contain a `code` and a `message` in this case.
         /// 
@@ -5226,15 +4516,14 @@ namespace Azure.Maps.Search
         ///             &quot;response&quot;:
         ///             {
         ///                 &quot;summary&quot;: {
-        ///                     &quot;queryTime&quot;: 11
+        ///                     &quot;query&quot;: &quot;one microsoft way redmond wa 98052&quot;
         ///                 },
-        ///                 &quot;addresses&quot;: [
+        ///                 &quot;results&quot;: [
         ///                     {
-        ///                         &quot;address&quot;: {
-        ///                             &quot;country&quot;: &quot;France&quot;,
-        ///                             &quot;freeformAddress&quot;: &quot;Avenue Anatole France, 75007 Paris&quot;
-        ///                         },
-        ///                         &quot;position&quot;: &quot;48.858490,2.294820&quot;
+        ///                         &quot;position&quot;: {
+        ///                             &quot;lat&quot;: 47.63989,
+        ///                             &quot;lon&quot;: -122.12509
+        ///                         }
         ///                     }
         ///                 ]
         ///             }
@@ -5244,15 +4533,14 @@ namespace Azure.Maps.Search
         ///             &quot;response&quot;:
         ///             {
         ///                 &quot;summary&quot;: {
-        ///                     &quot;queryTime&quot;: 1
+        ///                     &quot;query&quot;: &quot;pike pl seattle wa 98101&quot;
         ///                 },
-        ///                 &quot;addresses&quot;: [
+        ///                 &quot;results&quot;: [
         ///                     {
-        ///                         &quot;address&quot;: {
-        ///                             &quot;country&quot;: &quot;United States of America&quot;,
-        ///                             &quot;freeformAddress&quot;: &quot;157th Pl NE, Redmond WA 98052&quot;
-        ///                         },
-        ///                         &quot;position&quot;: &quot;47.640470,-122.129430&quot;
+        ///                         &quot;position&quot;: {
+        ///                             &quot;lat&quot;: 47.60963,
+        ///                             &quot;lon&quot;: -122.34215
+        ///                         }
         ///                     }
         ///                 ]
         ///             }
@@ -5273,21 +4561,22 @@ namespace Azure.Maps.Search
         /// ```.
         /// </summary>
         /// <param name="format"> Desired format of the response. Only `json` format is supported. </param>
-        /// <param name="searchAddressReverseBatchRequestBody"> The list of reverse geocoding queries/requests to process. The list can contain  a max of 10,000 queries and must contain at least 1 query. </param>
+        /// <param name="searchAddressBatchRequestBody"> The list of address geocoding queries/requests to process. The list can contain  a max of 10,000 queries and must contain at least 1 query. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="searchAddressReverseBatchRequestBody"/> is null. </exception>
-        public async Task<ResponseWithHeaders<SearchPostSearchAddressReverseBatchHeaders>> PostSearchAddressReverseBatchAsync(ResponseFormat format, BatchRequestBody searchAddressReverseBatchRequestBody, CancellationToken cancellationToken = default)
+        /// <exception cref="ArgumentNullException"> <paramref name="searchAddressBatchRequestBody"/> is null. </exception>
+        public async Task<ResponseWithHeaders<SearchPostSearchAddressBatchHeaders>> PostSearchAddressBatchAsync(ResponseFormat format, BatchRequestBody searchAddressBatchRequestBody, CancellationToken cancellationToken = default)
         {
-            if (searchAddressReverseBatchRequestBody == null)
+            if (searchAddressBatchRequestBody == null)
             {
-                throw new ArgumentNullException(nameof(searchAddressReverseBatchRequestBody));
+                throw new ArgumentNullException(nameof(searchAddressBatchRequestBody));
             }
 
-            using var message = CreatePostSearchAddressReverseBatchRequest(format, searchAddressReverseBatchRequestBody);
+            using var message = CreatePostSearchAddressBatchRequest(format, searchAddressBatchRequestBody);
             await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            var headers = new SearchPostSearchAddressReverseBatchHeaders(message.Response);
+            var headers = new SearchPostSearchAddressBatchHeaders(message.Response);
             switch (message.Response.Status)
             {
+                case 200:
                 case 202:
                     return ResponseWithHeaders.FromValue(headers, message.Response);
                 default:
@@ -5296,18 +4585,18 @@ namespace Azure.Maps.Search
         }
 
         /// <summary>
-        /// **Search Address Reverse Batch API**
+        /// **Search Address Batch API**
         /// 
         /// 
         /// **Applies to**: S1 pricing tier.
         /// 
         /// 
         /// 
-        /// The Search Address Batch API sends batches of queries to [Search Address Reverse API](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse) using just a single API call. You can call Search Address Reverse Batch API to run either asynchronously (async) or synchronously (sync). The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries.
+        /// The Search Address Batch API sends batches of queries to [Search Address API](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress) using just a single API call. You can call Search Address Batch API to run either asynchronously (async) or synchronously (sync). The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries.
         /// ### Submit Synchronous Batch Request
         /// The Synchronous API is recommended for lightweight batch requests. When the service receives a request, it will respond as soon as the batch items are calculated and there will be no possibility to retrieve the results later. The Synchronous API will return a timeout error (a 408 response) if the request takes longer than 60 seconds. The number of batch items is limited to **100** for this API.
         /// ```
-        /// POST https://atlas.microsoft.com/search/address/reverse/batch/sync/json?api-version=1.0&amp;subscription-key={subscription-key}
+        /// POST https://atlas.microsoft.com/search/address/batch/sync/json?api-version=1.0&amp;subscription-key={subscription-key}
         /// ```
         /// ### Submit Asynchronous Batch Request
         /// The Asynchronous API is appropriate for processing big volumes of relatively complex search requests
@@ -5335,22 +4624,22 @@ namespace Azure.Maps.Search
         /// 4. Client issues a `GET` request on the _download URL_ obtained in Step 3 to download the batch results.
         /// 
         /// ### POST Body for Batch Request
-        /// To send the _search address reverse_ queries you will use a `POST` request where the request body will contain the `batchItems` array in `json` format and the `Content-Type` header will be set to `application/json`. Here&apos;s a sample request body containing 5 _search address reverse_ queries:
+        /// To send the _search address_ queries you will use a `POST` request where the request body will contain the `batchItems` array in `json` format and the `Content-Type` header will be set to `application/json`. Here&apos;s a sample request body containing 5 _search address_ queries:
         /// 
         /// 
         /// ```json
         /// {
         ///     &quot;batchItems&quot;: [
-        ///         {&quot;query&quot;: &quot;?query=48.858561,2.294911&quot;},
-        ///         {&quot;query&quot;: &quot;?query=47.639765,-122.127896&amp;radius=5000&amp;limit=2&quot;},
-        ///         {&quot;query&quot;: &quot;?query=47.621028,-122.348170&quot;},
-        ///         {&quot;query&quot;: &quot;?query=43.722990,10.396695&quot;},
-        ///         {&quot;query&quot;: &quot;?query=40.750958,-73.982336&quot;}
+        ///         {&quot;query&quot;: &quot;?query=400 Broad St, Seattle, WA 98109&amp;limit=3&quot;},
+        ///         {&quot;query&quot;: &quot;?query=One, Microsoft Way, Redmond, WA 98052&amp;limit=3&quot;},
+        ///         {&quot;query&quot;: &quot;?query=350 5th Ave, New York, NY 10118&amp;limit=1&quot;},
+        ///         {&quot;query&quot;: &quot;?query=Pike Pl, Seattle, WA 98101&amp;lat=47.610970&amp;lon=-122.342469&amp;radius=1000&quot;},
+        ///         {&quot;query&quot;: &quot;?query=Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France&amp;limit=1&quot;}
         ///     ]
         /// }
         /// ```
         /// 
-        /// A _search address reverse_ query in a batch is just a partial URL _without_ the protocol, base URL, path, api-version and subscription-key. It can accept any of the supported _search address reverse_ [URI parameters](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse#uri-parameters). The string values in the _search address reverse_ query must be properly escaped (e.g. &quot; character should be escaped with \\ ) and it should also be properly URL-encoded.
+        /// A _search address_ query in a batch is just a partial URL _without_ the protocol, base URL, path, api-version and subscription-key. It can accept any of the supported _search address_ [URI parameters](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress#uri-parameters). The string values in the _search address_ query must be properly escaped (e.g. &quot; character should be escaped with \\ ) and it should also be properly URL-encoded.
         /// 
         /// 
         /// The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries, and the batch should contain at least **1** query.
@@ -5375,7 +4664,7 @@ namespace Azure.Maps.Search
         /// ### Batch Response Model
         /// The returned data content is similar for async and sync requests. When downloading the results of an async batch request, if the batch has finished processing, the response body contains the batch response. This batch response contains a `summary` component that indicates the `totalRequests` that were part of the original batch request and `successfulRequests`i.e. queries which were executed successfully. The batch response also includes a `batchItems` array which contains a response for each and every query in the batch request. The `batchItems` will contain the results in the exact same order the original queries were sent in the batch request. Each item in `batchItems` contains `statusCode` and `response` fields. Each `response` in `batchItems` is of one of the following types:
         /// 
-        ///   - [`SearchAddressReverseResponse`](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse#searchaddressreverseresponse) - If the query completed successfully.
+        ///   - [`SearchCommonResponse`](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress#SearchCommonResponse) - If the query completed successfully.
         /// 
         ///   - `Error` - If the query failed. The response will contain a `code` and a `message` in this case.
         /// 
@@ -5395,15 +4684,14 @@ namespace Azure.Maps.Search
         ///             &quot;response&quot;:
         ///             {
         ///                 &quot;summary&quot;: {
-        ///                     &quot;queryTime&quot;: 11
+        ///                     &quot;query&quot;: &quot;one microsoft way redmond wa 98052&quot;
         ///                 },
-        ///                 &quot;addresses&quot;: [
+        ///                 &quot;results&quot;: [
         ///                     {
-        ///                         &quot;address&quot;: {
-        ///                             &quot;country&quot;: &quot;France&quot;,
-        ///                             &quot;freeformAddress&quot;: &quot;Avenue Anatole France, 75007 Paris&quot;
-        ///                         },
-        ///                         &quot;position&quot;: &quot;48.858490,2.294820&quot;
+        ///                         &quot;position&quot;: {
+        ///                             &quot;lat&quot;: 47.63989,
+        ///                             &quot;lon&quot;: -122.12509
+        ///                         }
         ///                     }
         ///                 ]
         ///             }
@@ -5413,15 +4701,14 @@ namespace Azure.Maps.Search
         ///             &quot;response&quot;:
         ///             {
         ///                 &quot;summary&quot;: {
-        ///                     &quot;queryTime&quot;: 1
+        ///                     &quot;query&quot;: &quot;pike pl seattle wa 98101&quot;
         ///                 },
-        ///                 &quot;addresses&quot;: [
+        ///                 &quot;results&quot;: [
         ///                     {
-        ///                         &quot;address&quot;: {
-        ///                             &quot;country&quot;: &quot;United States of America&quot;,
-        ///                             &quot;freeformAddress&quot;: &quot;157th Pl NE, Redmond WA 98052&quot;
-        ///                         },
-        ///                         &quot;position&quot;: &quot;47.640470,-122.129430&quot;
+        ///                         &quot;position&quot;: {
+        ///                             &quot;lat&quot;: 47.60963,
+        ///                             &quot;lon&quot;: -122.34215
+        ///                         }
         ///                     }
         ///                 ]
         ///             }
@@ -5442,21 +4729,22 @@ namespace Azure.Maps.Search
         /// ```.
         /// </summary>
         /// <param name="format"> Desired format of the response. Only `json` format is supported. </param>
-        /// <param name="searchAddressReverseBatchRequestBody"> The list of reverse geocoding queries/requests to process. The list can contain  a max of 10,000 queries and must contain at least 1 query. </param>
+        /// <param name="searchAddressBatchRequestBody"> The list of address geocoding queries/requests to process. The list can contain  a max of 10,000 queries and must contain at least 1 query. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="searchAddressReverseBatchRequestBody"/> is null. </exception>
-        public ResponseWithHeaders<SearchPostSearchAddressReverseBatchHeaders> PostSearchAddressReverseBatch(ResponseFormat format, BatchRequestBody searchAddressReverseBatchRequestBody, CancellationToken cancellationToken = default)
+        /// <exception cref="ArgumentNullException"> <paramref name="searchAddressBatchRequestBody"/> is null. </exception>
+        public ResponseWithHeaders<SearchPostSearchAddressBatchHeaders> PostSearchAddressBatch(ResponseFormat format, BatchRequestBody searchAddressBatchRequestBody, CancellationToken cancellationToken = default)
         {
-            if (searchAddressReverseBatchRequestBody == null)
+            if (searchAddressBatchRequestBody == null)
             {
-                throw new ArgumentNullException(nameof(searchAddressReverseBatchRequestBody));
+                throw new ArgumentNullException(nameof(searchAddressBatchRequestBody));
             }
 
-            using var message = CreatePostSearchAddressReverseBatchRequest(format, searchAddressReverseBatchRequestBody);
+            using var message = CreatePostSearchAddressBatchRequest(format, searchAddressBatchRequestBody);
             _pipeline.Send(message, cancellationToken);
-            var headers = new SearchPostSearchAddressReverseBatchHeaders(message.Response);
+            var headers = new SearchPostSearchAddressBatchHeaders(message.Response);
             switch (message.Response.Status)
             {
+                case 200:
                 case 202:
                     return ResponseWithHeaders.FromValue(headers, message.Response);
                 default:
@@ -5464,7 +4752,7 @@ namespace Azure.Maps.Search
             }
         }
 
-        internal HttpMessage CreateGetSearchAddressReverseBatchRequest(string format)
+        internal HttpMessage CreateGetSearchAddressBatchRequest(string format)
         {
             var message = _pipeline.CreateMessage();
             var request = message.Request;
@@ -5473,7 +4761,7 @@ namespace Azure.Maps.Search
             uri.AppendRaw("https://", false);
             uri.AppendRaw(geography.ToString(), true);
             uri.AppendRaw(".atlas.microsoft.com", false);
-            uri.AppendPath("/search/address/reverse/batch/", false);
+            uri.AppendPath("/search/address/batch/", false);
             uri.AppendPath(format, true);
             uri.AppendQuery("api-version", apiVersion, true);
             request.Uri = uri;
@@ -5486,18 +4774,18 @@ namespace Azure.Maps.Search
         }
 
         /// <summary>
-        /// **Search Address Reverse Batch API**
+        /// **Search Address Batch API**
         /// 
         /// 
         /// **Applies to**: S1 pricing tier.
         /// 
         /// 
         /// 
-        /// The Search Address Batch API sends batches of queries to [Search Address Reverse API](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse) using just a single API call. You can call Search Address Reverse Batch API to run either asynchronously (async) or synchronously (sync). The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries.
+        /// The Search Address Batch API sends batches of queries to [Search Address API](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress) using just a single API call. You can call Search Address Batch API to run either asynchronously (async) or synchronously (sync). The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries.
         /// ### Submit Synchronous Batch Request
         /// The Synchronous API is recommended for lightweight batch requests. When the service receives a request, it will respond as soon as the batch items are calculated and there will be no possibility to retrieve the results later. The Synchronous API will return a timeout error (a 408 response) if the request takes longer than 60 seconds. The number of batch items is limited to **100** for this API.
         /// ```
-        /// POST https://atlas.microsoft.com/search/address/reverse/batch/sync/json?api-version=1.0&amp;subscription-key={subscription-key}
+        /// POST https://atlas.microsoft.com/search/address/batch/sync/json?api-version=1.0&amp;subscription-key={subscription-key}
         /// ```
         /// ### Submit Asynchronous Batch Request
         /// The Asynchronous API is appropriate for processing big volumes of relatively complex search requests
@@ -5525,22 +4813,22 @@ namespace Azure.Maps.Search
         /// 4. Client issues a `GET` request on the _download URL_ obtained in Step 3 to download the batch results.
         /// 
         /// ### POST Body for Batch Request
-        /// To send the _search address reverse_ queries you will use a `POST` request where the request body will contain the `batchItems` array in `json` format and the `Content-Type` header will be set to `application/json`. Here&apos;s a sample request body containing 5 _search address reverse_ queries:
+        /// To send the _search address_ queries you will use a `POST` request where the request body will contain the `batchItems` array in `json` format and the `Content-Type` header will be set to `application/json`. Here&apos;s a sample request body containing 5 _search address_ queries:
         /// 
         /// 
         /// ```json
         /// {
         ///     &quot;batchItems&quot;: [
-        ///         {&quot;query&quot;: &quot;?query=48.858561,2.294911&quot;},
-        ///         {&quot;query&quot;: &quot;?query=47.639765,-122.127896&amp;radius=5000&amp;limit=2&quot;},
-        ///         {&quot;query&quot;: &quot;?query=47.621028,-122.348170&quot;},
-        ///         {&quot;query&quot;: &quot;?query=43.722990,10.396695&quot;},
-        ///         {&quot;query&quot;: &quot;?query=40.750958,-73.982336&quot;}
+        ///         {&quot;query&quot;: &quot;?query=400 Broad St, Seattle, WA 98109&amp;limit=3&quot;},
+        ///         {&quot;query&quot;: &quot;?query=One, Microsoft Way, Redmond, WA 98052&amp;limit=3&quot;},
+        ///         {&quot;query&quot;: &quot;?query=350 5th Ave, New York, NY 10118&amp;limit=1&quot;},
+        ///         {&quot;query&quot;: &quot;?query=Pike Pl, Seattle, WA 98101&amp;lat=47.610970&amp;lon=-122.342469&amp;radius=1000&quot;},
+        ///         {&quot;query&quot;: &quot;?query=Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France&amp;limit=1&quot;}
         ///     ]
         /// }
         /// ```
         /// 
-        /// A _search address reverse_ query in a batch is just a partial URL _without_ the protocol, base URL, path, api-version and subscription-key. It can accept any of the supported _search address reverse_ [URI parameters](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse#uri-parameters). The string values in the _search address reverse_ query must be properly escaped (e.g. &quot; character should be escaped with \\ ) and it should also be properly URL-encoded.
+        /// A _search address_ query in a batch is just a partial URL _without_ the protocol, base URL, path, api-version and subscription-key. It can accept any of the supported _search address_ [URI parameters](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress#uri-parameters). The string values in the _search address_ query must be properly escaped (e.g. &quot; character should be escaped with \\ ) and it should also be properly URL-encoded.
         /// 
         /// 
         /// The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries, and the batch should contain at least **1** query.
@@ -5565,7 +4853,7 @@ namespace Azure.Maps.Search
         /// ### Batch Response Model
         /// The returned data content is similar for async and sync requests. When downloading the results of an async batch request, if the batch has finished processing, the response body contains the batch response. This batch response contains a `summary` component that indicates the `totalRequests` that were part of the original batch request and `successfulRequests`i.e. queries which were executed successfully. The batch response also includes a `batchItems` array which contains a response for each and every query in the batch request. The `batchItems` will contain the results in the exact same order the original queries were sent in the batch request. Each item in `batchItems` contains `statusCode` and `response` fields. Each `response` in `batchItems` is of one of the following types:
         /// 
-        ///   - [`SearchAddressReverseResponse`](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse#searchaddressreverseresponse) - If the query completed successfully.
+        ///   - [`SearchCommonResponse`](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress#SearchCommonResponse) - If the query completed successfully.
         /// 
         ///   - `Error` - If the query failed. The response will contain a `code` and a `message` in this case.
         /// 
@@ -5585,15 +4873,14 @@ namespace Azure.Maps.Search
         ///             &quot;response&quot;:
         ///             {
         ///                 &quot;summary&quot;: {
-        ///                     &quot;queryTime&quot;: 11
+        ///                     &quot;query&quot;: &quot;one microsoft way redmond wa 98052&quot;
         ///                 },
-        ///                 &quot;addresses&quot;: [
+        ///                 &quot;results&quot;: [
         ///                     {
-        ///                         &quot;address&quot;: {
-        ///                             &quot;country&quot;: &quot;France&quot;,
-        ///                             &quot;freeformAddress&quot;: &quot;Avenue Anatole France, 75007 Paris&quot;
-        ///                         },
-        ///                         &quot;position&quot;: &quot;48.858490,2.294820&quot;
+        ///                         &quot;position&quot;: {
+        ///                             &quot;lat&quot;: 47.63989,
+        ///                             &quot;lon&quot;: -122.12509
+        ///                         }
         ///                     }
         ///                 ]
         ///             }
@@ -5603,15 +4890,14 @@ namespace Azure.Maps.Search
         ///             &quot;response&quot;:
         ///             {
         ///                 &quot;summary&quot;: {
-        ///                     &quot;queryTime&quot;: 1
+        ///                     &quot;query&quot;: &quot;pike pl seattle wa 98101&quot;
         ///                 },
-        ///                 &quot;addresses&quot;: [
+        ///                 &quot;results&quot;: [
         ///                     {
-        ///                         &quot;address&quot;: {
-        ///                             &quot;country&quot;: &quot;United States of America&quot;,
-        ///                             &quot;freeformAddress&quot;: &quot;157th Pl NE, Redmond WA 98052&quot;
-        ///                         },
-        ///                         &quot;position&quot;: &quot;47.640470,-122.129430&quot;
+        ///                         &quot;position&quot;: {
+        ///                             &quot;lat&quot;: 47.60963,
+        ///                             &quot;lon&quot;: -122.34215
+        ///                         }
         ///                     }
         ///                 ]
         ///             }
@@ -5634,16 +4920,16 @@ namespace Azure.Maps.Search
         /// <param name="format"> Batch id for querying the operation. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="format"/> is null. </exception>
-        public async Task<ResponseWithHeaders<SearchGetSearchAddressReverseBatchHeaders>> GetSearchAddressReverseBatchAsync(string format, CancellationToken cancellationToken = default)
+        public async Task<ResponseWithHeaders<SearchGetSearchAddressBatchHeaders>> GetSearchAddressBatchAsync(string format, CancellationToken cancellationToken = default)
         {
             if (format == null)
             {
                 throw new ArgumentNullException(nameof(format));
             }
 
-            using var message = CreateGetSearchAddressReverseBatchRequest(format);
+            using var message = CreateGetSearchAddressBatchRequest(format);
             await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            var headers = new SearchGetSearchAddressReverseBatchHeaders(message.Response);
+            var headers = new SearchGetSearchAddressBatchHeaders(message.Response);
             switch (message.Response.Status)
             {
                 case 200:
@@ -5655,18 +4941,18 @@ namespace Azure.Maps.Search
         }
 
         /// <summary>
-        /// **Search Address Reverse Batch API**
+        /// **Search Address Batch API**
         /// 
         /// 
         /// **Applies to**: S1 pricing tier.
         /// 
         /// 
         /// 
-        /// The Search Address Batch API sends batches of queries to [Search Address Reverse API](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse) using just a single API call. You can call Search Address Reverse Batch API to run either asynchronously (async) or synchronously (sync). The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries.
+        /// The Search Address Batch API sends batches of queries to [Search Address API](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress) using just a single API call. You can call Search Address Batch API to run either asynchronously (async) or synchronously (sync). The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries.
         /// ### Submit Synchronous Batch Request
         /// The Synchronous API is recommended for lightweight batch requests. When the service receives a request, it will respond as soon as the batch items are calculated and there will be no possibility to retrieve the results later. The Synchronous API will return a timeout error (a 408 response) if the request takes longer than 60 seconds. The number of batch items is limited to **100** for this API.
         /// ```
-        /// POST https://atlas.microsoft.com/search/address/reverse/batch/sync/json?api-version=1.0&amp;subscription-key={subscription-key}
+        /// POST https://atlas.microsoft.com/search/address/batch/sync/json?api-version=1.0&amp;subscription-key={subscription-key}
         /// ```
         /// ### Submit Asynchronous Batch Request
         /// The Asynchronous API is appropriate for processing big volumes of relatively complex search requests
@@ -5694,22 +4980,22 @@ namespace Azure.Maps.Search
         /// 4. Client issues a `GET` request on the _download URL_ obtained in Step 3 to download the batch results.
         /// 
         /// ### POST Body for Batch Request
-        /// To send the _search address reverse_ queries you will use a `POST` request where the request body will contain the `batchItems` array in `json` format and the `Content-Type` header will be set to `application/json`. Here&apos;s a sample request body containing 5 _search address reverse_ queries:
+        /// To send the _search address_ queries you will use a `POST` request where the request body will contain the `batchItems` array in `json` format and the `Content-Type` header will be set to `application/json`. Here&apos;s a sample request body containing 5 _search address_ queries:
         /// 
         /// 
         /// ```json
         /// {
         ///     &quot;batchItems&quot;: [
-        ///         {&quot;query&quot;: &quot;?query=48.858561,2.294911&quot;},
-        ///         {&quot;query&quot;: &quot;?query=47.639765,-122.127896&amp;radius=5000&amp;limit=2&quot;},
-        ///         {&quot;query&quot;: &quot;?query=47.621028,-122.348170&quot;},
-        ///         {&quot;query&quot;: &quot;?query=43.722990,10.396695&quot;},
-        ///         {&quot;query&quot;: &quot;?query=40.750958,-73.982336&quot;}
+        ///         {&quot;query&quot;: &quot;?query=400 Broad St, Seattle, WA 98109&amp;limit=3&quot;},
+        ///         {&quot;query&quot;: &quot;?query=One, Microsoft Way, Redmond, WA 98052&amp;limit=3&quot;},
+        ///         {&quot;query&quot;: &quot;?query=350 5th Ave, New York, NY 10118&amp;limit=1&quot;},
+        ///         {&quot;query&quot;: &quot;?query=Pike Pl, Seattle, WA 98101&amp;lat=47.610970&amp;lon=-122.342469&amp;radius=1000&quot;},
+        ///         {&quot;query&quot;: &quot;?query=Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France&amp;limit=1&quot;}
         ///     ]
         /// }
         /// ```
         /// 
-        /// A _search address reverse_ query in a batch is just a partial URL _without_ the protocol, base URL, path, api-version and subscription-key. It can accept any of the supported _search address reverse_ [URI parameters](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse#uri-parameters). The string values in the _search address reverse_ query must be properly escaped (e.g. &quot; character should be escaped with \\ ) and it should also be properly URL-encoded.
+        /// A _search address_ query in a batch is just a partial URL _without_ the protocol, base URL, path, api-version and subscription-key. It can accept any of the supported _search address_ [URI parameters](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress#uri-parameters). The string values in the _search address_ query must be properly escaped (e.g. &quot; character should be escaped with \\ ) and it should also be properly URL-encoded.
         /// 
         /// 
         /// The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries, and the batch should contain at least **1** query.
@@ -5734,7 +5020,7 @@ namespace Azure.Maps.Search
         /// ### Batch Response Model
         /// The returned data content is similar for async and sync requests. When downloading the results of an async batch request, if the batch has finished processing, the response body contains the batch response. This batch response contains a `summary` component that indicates the `totalRequests` that were part of the original batch request and `successfulRequests`i.e. queries which were executed successfully. The batch response also includes a `batchItems` array which contains a response for each and every query in the batch request. The `batchItems` will contain the results in the exact same order the original queries were sent in the batch request. Each item in `batchItems` contains `statusCode` and `response` fields. Each `response` in `batchItems` is of one of the following types:
         /// 
-        ///   - [`SearchAddressReverseResponse`](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse#searchaddressreverseresponse) - If the query completed successfully.
+        ///   - [`SearchCommonResponse`](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddress#SearchCommonResponse) - If the query completed successfully.
         /// 
         ///   - `Error` - If the query failed. The response will contain a `code` and a `message` in this case.
         /// 
@@ -5754,15 +5040,14 @@ namespace Azure.Maps.Search
         ///             &quot;response&quot;:
         ///             {
         ///                 &quot;summary&quot;: {
-        ///                     &quot;queryTime&quot;: 11
+        ///                     &quot;query&quot;: &quot;one microsoft way redmond wa 98052&quot;
         ///                 },
-        ///                 &quot;addresses&quot;: [
+        ///                 &quot;results&quot;: [
         ///                     {
-        ///                         &quot;address&quot;: {
-        ///                             &quot;country&quot;: &quot;France&quot;,
-        ///                             &quot;freeformAddress&quot;: &quot;Avenue Anatole France, 75007 Paris&quot;
-        ///                         },
-        ///                         &quot;position&quot;: &quot;48.858490,2.294820&quot;
+        ///                         &quot;position&quot;: {
+        ///                             &quot;lat&quot;: 47.63989,
+        ///                             &quot;lon&quot;: -122.12509
+        ///                         }
         ///                     }
         ///                 ]
         ///             }
@@ -5772,15 +5057,14 @@ namespace Azure.Maps.Search
         ///             &quot;response&quot;:
         ///             {
         ///                 &quot;summary&quot;: {
-        ///                     &quot;queryTime&quot;: 1
+        ///                     &quot;query&quot;: &quot;pike pl seattle wa 98101&quot;
         ///                 },
-        ///                 &quot;addresses&quot;: [
+        ///                 &quot;results&quot;: [
         ///                     {
-        ///                         &quot;address&quot;: {
-        ///                             &quot;country&quot;: &quot;United States of America&quot;,
-        ///                             &quot;freeformAddress&quot;: &quot;157th Pl NE, Redmond WA 98052&quot;
-        ///                         },
-        ///                         &quot;position&quot;: &quot;47.640470,-122.129430&quot;
+        ///                         &quot;position&quot;: {
+        ///                             &quot;lat&quot;: 47.60963,
+        ///                             &quot;lon&quot;: -122.34215
+        ///                         }
         ///                     }
         ///                 ]
         ///             }
@@ -5803,16 +5087,16 @@ namespace Azure.Maps.Search
         /// <param name="format"> Batch id for querying the operation. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="format"/> is null. </exception>
-        public ResponseWithHeaders<SearchGetSearchAddressReverseBatchHeaders> GetSearchAddressReverseBatch(string format, CancellationToken cancellationToken = default)
+        public ResponseWithHeaders<SearchGetSearchAddressBatchHeaders> GetSearchAddressBatch(string format, CancellationToken cancellationToken = default)
         {
             if (format == null)
             {
                 throw new ArgumentNullException(nameof(format));
             }
 
-            using var message = CreateGetSearchAddressReverseBatchRequest(format);
+            using var message = CreateGetSearchAddressBatchRequest(format);
             _pipeline.Send(message, cancellationToken);
-            var headers = new SearchGetSearchAddressReverseBatchHeaders(message.Response);
+            var headers = new SearchGetSearchAddressBatchHeaders(message.Response);
             switch (message.Response.Status)
             {
                 case 200:
@@ -6189,6 +5473,730 @@ namespace Azure.Maps.Search
                         value = SearchAddressReverseBatchResponse.DeserializeSearchAddressReverseBatchResponse(document.RootElement);
                         return Response.FromValue(value, message.Response);
                     }
+                default:
+                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
+            }
+        }
+
+        internal HttpMessage CreatePostSearchAddressReverseBatchRequest(ResponseFormat format, BatchRequestBody searchAddressReverseBatchRequestBody)
+        {
+            var message = _pipeline.CreateMessage();
+            var request = message.Request;
+            request.Method = RequestMethod.Post;
+            var uri = new RawRequestUriBuilder();
+            uri.AppendRaw("https://", false);
+            uri.AppendRaw(geography.ToString(), true);
+            uri.AppendRaw(".atlas.microsoft.com", false);
+            uri.AppendPath("/search/address/reverse/batch/", false);
+            uri.AppendPath(format.ToString(), true);
+            uri.AppendQuery("api-version", apiVersion, true);
+            request.Uri = uri;
+            if (xMsClientId != null)
+            {
+                request.Headers.Add("x-ms-client-id", xMsClientId);
+            }
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("Content-Type", "application/json");
+            var content = new Utf8JsonRequestContent();
+            content.JsonWriter.WriteObjectValue(searchAddressReverseBatchRequestBody);
+            request.Content = content;
+            return message;
+        }
+
+        /// <summary>
+        /// **Search Address Reverse Batch API**
+        /// 
+        /// 
+        /// **Applies to**: S1 pricing tier.
+        /// 
+        /// 
+        /// 
+        /// The Search Address Batch API sends batches of queries to [Search Address Reverse API](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse) using just a single API call. You can call Search Address Reverse Batch API to run either asynchronously (async) or synchronously (sync). The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries.
+        /// ### Submit Synchronous Batch Request
+        /// The Synchronous API is recommended for lightweight batch requests. When the service receives a request, it will respond as soon as the batch items are calculated and there will be no possibility to retrieve the results later. The Synchronous API will return a timeout error (a 408 response) if the request takes longer than 60 seconds. The number of batch items is limited to **100** for this API.
+        /// ```
+        /// POST https://atlas.microsoft.com/search/address/reverse/batch/sync/json?api-version=1.0&amp;subscription-key={subscription-key}
+        /// ```
+        /// ### Submit Asynchronous Batch Request
+        /// The Asynchronous API is appropriate for processing big volumes of relatively complex search requests
+        /// - It allows the retrieval of results in a separate call (multiple downloads are possible).
+        /// - The asynchronous API is optimized for reliability and is not expected to run into a timeout.
+        /// - The number of batch items is limited to **10,000** for this API.
+        /// 
+        /// When you make a request by using async request, by default the service returns a 202 response code along a redirect URL in the Location field of the response header. This URL should be checked periodically until the response data or error information is available.
+        /// The asynchronous responses are stored for **14** days. The redirect URL returns a 404 response if used after the expiration period.
+        /// 
+        /// Please note that asynchronous batch request is a long-running request. Here&apos;s a typical sequence of operations:
+        /// 1. Client sends a Search Address Batch `POST` request to Azure Maps
+        /// 2. The server will respond with one of the following:
+        /// 
+        ///     &gt; HTTP `202 Accepted` - Batch request has been accepted.
+        /// 
+        ///     &gt; HTTP `Error` - There was an error processing your Batch request. This could either be a `400 Bad Request` or any other `Error` status code.
+        /// 
+        /// 3. If the batch request was accepted successfully, the `Location` header in the response contains the URL to download the results of the batch request.
+        ///     This status URI looks like following:
+        /// 
+        /// ```
+        ///     GET https://atlas.microsoft.com/batch/{batch-id}?api-version=1.0&amp;subscription-key={subscription-key}
+        /// ```
+        /// 4. Client issues a `GET` request on the _download URL_ obtained in Step 3 to download the batch results.
+        /// 
+        /// ### POST Body for Batch Request
+        /// To send the _search address reverse_ queries you will use a `POST` request where the request body will contain the `batchItems` array in `json` format and the `Content-Type` header will be set to `application/json`. Here&apos;s a sample request body containing 5 _search address reverse_ queries:
+        /// 
+        /// 
+        /// ```json
+        /// {
+        ///     &quot;batchItems&quot;: [
+        ///         {&quot;query&quot;: &quot;?query=48.858561,2.294911&quot;},
+        ///         {&quot;query&quot;: &quot;?query=47.639765,-122.127896&amp;radius=5000&amp;limit=2&quot;},
+        ///         {&quot;query&quot;: &quot;?query=47.621028,-122.348170&quot;},
+        ///         {&quot;query&quot;: &quot;?query=43.722990,10.396695&quot;},
+        ///         {&quot;query&quot;: &quot;?query=40.750958,-73.982336&quot;}
+        ///     ]
+        /// }
+        /// ```
+        /// 
+        /// A _search address reverse_ query in a batch is just a partial URL _without_ the protocol, base URL, path, api-version and subscription-key. It can accept any of the supported _search address reverse_ [URI parameters](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse#uri-parameters). The string values in the _search address reverse_ query must be properly escaped (e.g. &quot; character should be escaped with \\ ) and it should also be properly URL-encoded.
+        /// 
+        /// 
+        /// The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries, and the batch should contain at least **1** query.
+        /// 
+        /// 
+        /// ### Download Asynchronous Batch Results
+        /// To download the async batch results you will issue a `GET` request to the batch download endpoint. This _download URL_ can be obtained from the `Location` header of a successful `POST` batch request and looks like the following:
+        /// 
+        /// ```
+        /// https://atlas.microsoft.com/batch/{batch-id}?api-version=1.0&amp;subscription-key={subscription-key}
+        /// ```
+        /// Here&apos;s the typical sequence of operations for downloading the batch results:
+        /// 1. Client sends a `GET` request using the _download URL_.
+        /// 2. The server will respond with one of the following:
+        /// 
+        ///     &gt; HTTP `202 Accepted` - Batch request was accepted but is still being processed. Please try again in some time.
+        /// 
+        ///     &gt; HTTP `200 OK` - Batch request successfully processed. The response body contains all the batch results.
+        /// 
+        /// 
+        /// 
+        /// ### Batch Response Model
+        /// The returned data content is similar for async and sync requests. When downloading the results of an async batch request, if the batch has finished processing, the response body contains the batch response. This batch response contains a `summary` component that indicates the `totalRequests` that were part of the original batch request and `successfulRequests`i.e. queries which were executed successfully. The batch response also includes a `batchItems` array which contains a response for each and every query in the batch request. The `batchItems` will contain the results in the exact same order the original queries were sent in the batch request. Each item in `batchItems` contains `statusCode` and `response` fields. Each `response` in `batchItems` is of one of the following types:
+        /// 
+        ///   - [`SearchAddressReverseResponse`](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse#searchaddressreverseresponse) - If the query completed successfully.
+        /// 
+        ///   - `Error` - If the query failed. The response will contain a `code` and a `message` in this case.
+        /// 
+        /// 
+        /// Here&apos;s a sample Batch Response with 2 _successful_ and 1 _failed_ result:
+        /// 
+        /// 
+        /// ```json
+        /// {
+        ///     &quot;summary&quot;: {
+        ///         &quot;successfulRequests&quot;: 2,
+        ///         &quot;totalRequests&quot;: 3
+        ///     },
+        ///     &quot;batchItems&quot;: [
+        ///         {
+        ///             &quot;statusCode&quot;: 200,
+        ///             &quot;response&quot;:
+        ///             {
+        ///                 &quot;summary&quot;: {
+        ///                     &quot;queryTime&quot;: 11
+        ///                 },
+        ///                 &quot;addresses&quot;: [
+        ///                     {
+        ///                         &quot;address&quot;: {
+        ///                             &quot;country&quot;: &quot;France&quot;,
+        ///                             &quot;freeformAddress&quot;: &quot;Avenue Anatole France, 75007 Paris&quot;
+        ///                         },
+        ///                         &quot;position&quot;: &quot;48.858490,2.294820&quot;
+        ///                     }
+        ///                 ]
+        ///             }
+        ///         },
+        ///         {
+        ///             &quot;statusCode&quot;: 200,
+        ///             &quot;response&quot;:
+        ///             {
+        ///                 &quot;summary&quot;: {
+        ///                     &quot;queryTime&quot;: 1
+        ///                 },
+        ///                 &quot;addresses&quot;: [
+        ///                     {
+        ///                         &quot;address&quot;: {
+        ///                             &quot;country&quot;: &quot;United States of America&quot;,
+        ///                             &quot;freeformAddress&quot;: &quot;157th Pl NE, Redmond WA 98052&quot;
+        ///                         },
+        ///                         &quot;position&quot;: &quot;47.640470,-122.129430&quot;
+        ///                     }
+        ///                 ]
+        ///             }
+        ///         },
+        ///         {
+        ///             &quot;statusCode&quot;: 400,
+        ///             &quot;response&quot;:
+        ///             {
+        ///                 &quot;error&quot;:
+        ///                 {
+        ///                     &quot;code&quot;: &quot;400 BadRequest&quot;,
+        ///                     &quot;message&quot;: &quot;Bad request: one or more parameters were incorrectly specified or are mutually exclusive.&quot;
+        ///                 }
+        ///             }
+        ///         }
+        ///     ]
+        /// }
+        /// ```.
+        /// </summary>
+        /// <param name="format"> Desired format of the response. Only `json` format is supported. </param>
+        /// <param name="searchAddressReverseBatchRequestBody"> The list of reverse geocoding queries/requests to process. The list can contain  a max of 10,000 queries and must contain at least 1 query. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="searchAddressReverseBatchRequestBody"/> is null. </exception>
+        public async Task<ResponseWithHeaders<SearchPostSearchAddressReverseBatchHeaders>> PostSearchAddressReverseBatchAsync(ResponseFormat format, BatchRequestBody searchAddressReverseBatchRequestBody, CancellationToken cancellationToken = default)
+        {
+            if (searchAddressReverseBatchRequestBody == null)
+            {
+                throw new ArgumentNullException(nameof(searchAddressReverseBatchRequestBody));
+            }
+
+            using var message = CreatePostSearchAddressReverseBatchRequest(format, searchAddressReverseBatchRequestBody);
+            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            var headers = new SearchPostSearchAddressReverseBatchHeaders(message.Response);
+            switch (message.Response.Status)
+            {
+                case 200:
+                case 202:
+                    return ResponseWithHeaders.FromValue(headers, message.Response);
+                default:
+                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// **Search Address Reverse Batch API**
+        /// 
+        /// 
+        /// **Applies to**: S1 pricing tier.
+        /// 
+        /// 
+        /// 
+        /// The Search Address Batch API sends batches of queries to [Search Address Reverse API](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse) using just a single API call. You can call Search Address Reverse Batch API to run either asynchronously (async) or synchronously (sync). The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries.
+        /// ### Submit Synchronous Batch Request
+        /// The Synchronous API is recommended for lightweight batch requests. When the service receives a request, it will respond as soon as the batch items are calculated and there will be no possibility to retrieve the results later. The Synchronous API will return a timeout error (a 408 response) if the request takes longer than 60 seconds. The number of batch items is limited to **100** for this API.
+        /// ```
+        /// POST https://atlas.microsoft.com/search/address/reverse/batch/sync/json?api-version=1.0&amp;subscription-key={subscription-key}
+        /// ```
+        /// ### Submit Asynchronous Batch Request
+        /// The Asynchronous API is appropriate for processing big volumes of relatively complex search requests
+        /// - It allows the retrieval of results in a separate call (multiple downloads are possible).
+        /// - The asynchronous API is optimized for reliability and is not expected to run into a timeout.
+        /// - The number of batch items is limited to **10,000** for this API.
+        /// 
+        /// When you make a request by using async request, by default the service returns a 202 response code along a redirect URL in the Location field of the response header. This URL should be checked periodically until the response data or error information is available.
+        /// The asynchronous responses are stored for **14** days. The redirect URL returns a 404 response if used after the expiration period.
+        /// 
+        /// Please note that asynchronous batch request is a long-running request. Here&apos;s a typical sequence of operations:
+        /// 1. Client sends a Search Address Batch `POST` request to Azure Maps
+        /// 2. The server will respond with one of the following:
+        /// 
+        ///     &gt; HTTP `202 Accepted` - Batch request has been accepted.
+        /// 
+        ///     &gt; HTTP `Error` - There was an error processing your Batch request. This could either be a `400 Bad Request` or any other `Error` status code.
+        /// 
+        /// 3. If the batch request was accepted successfully, the `Location` header in the response contains the URL to download the results of the batch request.
+        ///     This status URI looks like following:
+        /// 
+        /// ```
+        ///     GET https://atlas.microsoft.com/batch/{batch-id}?api-version=1.0&amp;subscription-key={subscription-key}
+        /// ```
+        /// 4. Client issues a `GET` request on the _download URL_ obtained in Step 3 to download the batch results.
+        /// 
+        /// ### POST Body for Batch Request
+        /// To send the _search address reverse_ queries you will use a `POST` request where the request body will contain the `batchItems` array in `json` format and the `Content-Type` header will be set to `application/json`. Here&apos;s a sample request body containing 5 _search address reverse_ queries:
+        /// 
+        /// 
+        /// ```json
+        /// {
+        ///     &quot;batchItems&quot;: [
+        ///         {&quot;query&quot;: &quot;?query=48.858561,2.294911&quot;},
+        ///         {&quot;query&quot;: &quot;?query=47.639765,-122.127896&amp;radius=5000&amp;limit=2&quot;},
+        ///         {&quot;query&quot;: &quot;?query=47.621028,-122.348170&quot;},
+        ///         {&quot;query&quot;: &quot;?query=43.722990,10.396695&quot;},
+        ///         {&quot;query&quot;: &quot;?query=40.750958,-73.982336&quot;}
+        ///     ]
+        /// }
+        /// ```
+        /// 
+        /// A _search address reverse_ query in a batch is just a partial URL _without_ the protocol, base URL, path, api-version and subscription-key. It can accept any of the supported _search address reverse_ [URI parameters](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse#uri-parameters). The string values in the _search address reverse_ query must be properly escaped (e.g. &quot; character should be escaped with \\ ) and it should also be properly URL-encoded.
+        /// 
+        /// 
+        /// The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries, and the batch should contain at least **1** query.
+        /// 
+        /// 
+        /// ### Download Asynchronous Batch Results
+        /// To download the async batch results you will issue a `GET` request to the batch download endpoint. This _download URL_ can be obtained from the `Location` header of a successful `POST` batch request and looks like the following:
+        /// 
+        /// ```
+        /// https://atlas.microsoft.com/batch/{batch-id}?api-version=1.0&amp;subscription-key={subscription-key}
+        /// ```
+        /// Here&apos;s the typical sequence of operations for downloading the batch results:
+        /// 1. Client sends a `GET` request using the _download URL_.
+        /// 2. The server will respond with one of the following:
+        /// 
+        ///     &gt; HTTP `202 Accepted` - Batch request was accepted but is still being processed. Please try again in some time.
+        /// 
+        ///     &gt; HTTP `200 OK` - Batch request successfully processed. The response body contains all the batch results.
+        /// 
+        /// 
+        /// 
+        /// ### Batch Response Model
+        /// The returned data content is similar for async and sync requests. When downloading the results of an async batch request, if the batch has finished processing, the response body contains the batch response. This batch response contains a `summary` component that indicates the `totalRequests` that were part of the original batch request and `successfulRequests`i.e. queries which were executed successfully. The batch response also includes a `batchItems` array which contains a response for each and every query in the batch request. The `batchItems` will contain the results in the exact same order the original queries were sent in the batch request. Each item in `batchItems` contains `statusCode` and `response` fields. Each `response` in `batchItems` is of one of the following types:
+        /// 
+        ///   - [`SearchAddressReverseResponse`](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse#searchaddressreverseresponse) - If the query completed successfully.
+        /// 
+        ///   - `Error` - If the query failed. The response will contain a `code` and a `message` in this case.
+        /// 
+        /// 
+        /// Here&apos;s a sample Batch Response with 2 _successful_ and 1 _failed_ result:
+        /// 
+        /// 
+        /// ```json
+        /// {
+        ///     &quot;summary&quot;: {
+        ///         &quot;successfulRequests&quot;: 2,
+        ///         &quot;totalRequests&quot;: 3
+        ///     },
+        ///     &quot;batchItems&quot;: [
+        ///         {
+        ///             &quot;statusCode&quot;: 200,
+        ///             &quot;response&quot;:
+        ///             {
+        ///                 &quot;summary&quot;: {
+        ///                     &quot;queryTime&quot;: 11
+        ///                 },
+        ///                 &quot;addresses&quot;: [
+        ///                     {
+        ///                         &quot;address&quot;: {
+        ///                             &quot;country&quot;: &quot;France&quot;,
+        ///                             &quot;freeformAddress&quot;: &quot;Avenue Anatole France, 75007 Paris&quot;
+        ///                         },
+        ///                         &quot;position&quot;: &quot;48.858490,2.294820&quot;
+        ///                     }
+        ///                 ]
+        ///             }
+        ///         },
+        ///         {
+        ///             &quot;statusCode&quot;: 200,
+        ///             &quot;response&quot;:
+        ///             {
+        ///                 &quot;summary&quot;: {
+        ///                     &quot;queryTime&quot;: 1
+        ///                 },
+        ///                 &quot;addresses&quot;: [
+        ///                     {
+        ///                         &quot;address&quot;: {
+        ///                             &quot;country&quot;: &quot;United States of America&quot;,
+        ///                             &quot;freeformAddress&quot;: &quot;157th Pl NE, Redmond WA 98052&quot;
+        ///                         },
+        ///                         &quot;position&quot;: &quot;47.640470,-122.129430&quot;
+        ///                     }
+        ///                 ]
+        ///             }
+        ///         },
+        ///         {
+        ///             &quot;statusCode&quot;: 400,
+        ///             &quot;response&quot;:
+        ///             {
+        ///                 &quot;error&quot;:
+        ///                 {
+        ///                     &quot;code&quot;: &quot;400 BadRequest&quot;,
+        ///                     &quot;message&quot;: &quot;Bad request: one or more parameters were incorrectly specified or are mutually exclusive.&quot;
+        ///                 }
+        ///             }
+        ///         }
+        ///     ]
+        /// }
+        /// ```.
+        /// </summary>
+        /// <param name="format"> Desired format of the response. Only `json` format is supported. </param>
+        /// <param name="searchAddressReverseBatchRequestBody"> The list of reverse geocoding queries/requests to process. The list can contain  a max of 10,000 queries and must contain at least 1 query. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="searchAddressReverseBatchRequestBody"/> is null. </exception>
+        public ResponseWithHeaders<SearchPostSearchAddressReverseBatchHeaders> PostSearchAddressReverseBatch(ResponseFormat format, BatchRequestBody searchAddressReverseBatchRequestBody, CancellationToken cancellationToken = default)
+        {
+            if (searchAddressReverseBatchRequestBody == null)
+            {
+                throw new ArgumentNullException(nameof(searchAddressReverseBatchRequestBody));
+            }
+
+            using var message = CreatePostSearchAddressReverseBatchRequest(format, searchAddressReverseBatchRequestBody);
+            _pipeline.Send(message, cancellationToken);
+            var headers = new SearchPostSearchAddressReverseBatchHeaders(message.Response);
+            switch (message.Response.Status)
+            {
+                case 200:
+                case 202:
+                    return ResponseWithHeaders.FromValue(headers, message.Response);
+                default:
+                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
+            }
+        }
+
+        internal HttpMessage CreateGetSearchAddressReverseBatchRequest(string format)
+        {
+            var message = _pipeline.CreateMessage();
+            var request = message.Request;
+            request.Method = RequestMethod.Get;
+            var uri = new RawRequestUriBuilder();
+            uri.AppendRaw("https://", false);
+            uri.AppendRaw(geography.ToString(), true);
+            uri.AppendRaw(".atlas.microsoft.com", false);
+            uri.AppendPath("/search/address/reverse/batch/", false);
+            uri.AppendPath(format, true);
+            uri.AppendQuery("api-version", apiVersion, true);
+            request.Uri = uri;
+            if (xMsClientId != null)
+            {
+                request.Headers.Add("x-ms-client-id", xMsClientId);
+            }
+            request.Headers.Add("Accept", "application/json");
+            return message;
+        }
+
+        /// <summary>
+        /// **Search Address Reverse Batch API**
+        /// 
+        /// 
+        /// **Applies to**: S1 pricing tier.
+        /// 
+        /// 
+        /// 
+        /// The Search Address Batch API sends batches of queries to [Search Address Reverse API](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse) using just a single API call. You can call Search Address Reverse Batch API to run either asynchronously (async) or synchronously (sync). The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries.
+        /// ### Submit Synchronous Batch Request
+        /// The Synchronous API is recommended for lightweight batch requests. When the service receives a request, it will respond as soon as the batch items are calculated and there will be no possibility to retrieve the results later. The Synchronous API will return a timeout error (a 408 response) if the request takes longer than 60 seconds. The number of batch items is limited to **100** for this API.
+        /// ```
+        /// POST https://atlas.microsoft.com/search/address/reverse/batch/sync/json?api-version=1.0&amp;subscription-key={subscription-key}
+        /// ```
+        /// ### Submit Asynchronous Batch Request
+        /// The Asynchronous API is appropriate for processing big volumes of relatively complex search requests
+        /// - It allows the retrieval of results in a separate call (multiple downloads are possible).
+        /// - The asynchronous API is optimized for reliability and is not expected to run into a timeout.
+        /// - The number of batch items is limited to **10,000** for this API.
+        /// 
+        /// When you make a request by using async request, by default the service returns a 202 response code along a redirect URL in the Location field of the response header. This URL should be checked periodically until the response data or error information is available.
+        /// The asynchronous responses are stored for **14** days. The redirect URL returns a 404 response if used after the expiration period.
+        /// 
+        /// Please note that asynchronous batch request is a long-running request. Here&apos;s a typical sequence of operations:
+        /// 1. Client sends a Search Address Batch `POST` request to Azure Maps
+        /// 2. The server will respond with one of the following:
+        /// 
+        ///     &gt; HTTP `202 Accepted` - Batch request has been accepted.
+        /// 
+        ///     &gt; HTTP `Error` - There was an error processing your Batch request. This could either be a `400 Bad Request` or any other `Error` status code.
+        /// 
+        /// 3. If the batch request was accepted successfully, the `Location` header in the response contains the URL to download the results of the batch request.
+        ///     This status URI looks like following:
+        /// 
+        /// ```
+        ///     GET https://atlas.microsoft.com/batch/{batch-id}?api-version=1.0&amp;subscription-key={subscription-key}
+        /// ```
+        /// 4. Client issues a `GET` request on the _download URL_ obtained in Step 3 to download the batch results.
+        /// 
+        /// ### POST Body for Batch Request
+        /// To send the _search address reverse_ queries you will use a `POST` request where the request body will contain the `batchItems` array in `json` format and the `Content-Type` header will be set to `application/json`. Here&apos;s a sample request body containing 5 _search address reverse_ queries:
+        /// 
+        /// 
+        /// ```json
+        /// {
+        ///     &quot;batchItems&quot;: [
+        ///         {&quot;query&quot;: &quot;?query=48.858561,2.294911&quot;},
+        ///         {&quot;query&quot;: &quot;?query=47.639765,-122.127896&amp;radius=5000&amp;limit=2&quot;},
+        ///         {&quot;query&quot;: &quot;?query=47.621028,-122.348170&quot;},
+        ///         {&quot;query&quot;: &quot;?query=43.722990,10.396695&quot;},
+        ///         {&quot;query&quot;: &quot;?query=40.750958,-73.982336&quot;}
+        ///     ]
+        /// }
+        /// ```
+        /// 
+        /// A _search address reverse_ query in a batch is just a partial URL _without_ the protocol, base URL, path, api-version and subscription-key. It can accept any of the supported _search address reverse_ [URI parameters](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse#uri-parameters). The string values in the _search address reverse_ query must be properly escaped (e.g. &quot; character should be escaped with \\ ) and it should also be properly URL-encoded.
+        /// 
+        /// 
+        /// The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries, and the batch should contain at least **1** query.
+        /// 
+        /// 
+        /// ### Download Asynchronous Batch Results
+        /// To download the async batch results you will issue a `GET` request to the batch download endpoint. This _download URL_ can be obtained from the `Location` header of a successful `POST` batch request and looks like the following:
+        /// 
+        /// ```
+        /// https://atlas.microsoft.com/batch/{batch-id}?api-version=1.0&amp;subscription-key={subscription-key}
+        /// ```
+        /// Here&apos;s the typical sequence of operations for downloading the batch results:
+        /// 1. Client sends a `GET` request using the _download URL_.
+        /// 2. The server will respond with one of the following:
+        /// 
+        ///     &gt; HTTP `202 Accepted` - Batch request was accepted but is still being processed. Please try again in some time.
+        /// 
+        ///     &gt; HTTP `200 OK` - Batch request successfully processed. The response body contains all the batch results.
+        /// 
+        /// 
+        /// 
+        /// ### Batch Response Model
+        /// The returned data content is similar for async and sync requests. When downloading the results of an async batch request, if the batch has finished processing, the response body contains the batch response. This batch response contains a `summary` component that indicates the `totalRequests` that were part of the original batch request and `successfulRequests`i.e. queries which were executed successfully. The batch response also includes a `batchItems` array which contains a response for each and every query in the batch request. The `batchItems` will contain the results in the exact same order the original queries were sent in the batch request. Each item in `batchItems` contains `statusCode` and `response` fields. Each `response` in `batchItems` is of one of the following types:
+        /// 
+        ///   - [`SearchAddressReverseResponse`](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse#searchaddressreverseresponse) - If the query completed successfully.
+        /// 
+        ///   - `Error` - If the query failed. The response will contain a `code` and a `message` in this case.
+        /// 
+        /// 
+        /// Here&apos;s a sample Batch Response with 2 _successful_ and 1 _failed_ result:
+        /// 
+        /// 
+        /// ```json
+        /// {
+        ///     &quot;summary&quot;: {
+        ///         &quot;successfulRequests&quot;: 2,
+        ///         &quot;totalRequests&quot;: 3
+        ///     },
+        ///     &quot;batchItems&quot;: [
+        ///         {
+        ///             &quot;statusCode&quot;: 200,
+        ///             &quot;response&quot;:
+        ///             {
+        ///                 &quot;summary&quot;: {
+        ///                     &quot;queryTime&quot;: 11
+        ///                 },
+        ///                 &quot;addresses&quot;: [
+        ///                     {
+        ///                         &quot;address&quot;: {
+        ///                             &quot;country&quot;: &quot;France&quot;,
+        ///                             &quot;freeformAddress&quot;: &quot;Avenue Anatole France, 75007 Paris&quot;
+        ///                         },
+        ///                         &quot;position&quot;: &quot;48.858490,2.294820&quot;
+        ///                     }
+        ///                 ]
+        ///             }
+        ///         },
+        ///         {
+        ///             &quot;statusCode&quot;: 200,
+        ///             &quot;response&quot;:
+        ///             {
+        ///                 &quot;summary&quot;: {
+        ///                     &quot;queryTime&quot;: 1
+        ///                 },
+        ///                 &quot;addresses&quot;: [
+        ///                     {
+        ///                         &quot;address&quot;: {
+        ///                             &quot;country&quot;: &quot;United States of America&quot;,
+        ///                             &quot;freeformAddress&quot;: &quot;157th Pl NE, Redmond WA 98052&quot;
+        ///                         },
+        ///                         &quot;position&quot;: &quot;47.640470,-122.129430&quot;
+        ///                     }
+        ///                 ]
+        ///             }
+        ///         },
+        ///         {
+        ///             &quot;statusCode&quot;: 400,
+        ///             &quot;response&quot;:
+        ///             {
+        ///                 &quot;error&quot;:
+        ///                 {
+        ///                     &quot;code&quot;: &quot;400 BadRequest&quot;,
+        ///                     &quot;message&quot;: &quot;Bad request: one or more parameters were incorrectly specified or are mutually exclusive.&quot;
+        ///                 }
+        ///             }
+        ///         }
+        ///     ]
+        /// }
+        /// ```.
+        /// </summary>
+        /// <param name="format"> Batch id for querying the operation. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="format"/> is null. </exception>
+        public async Task<ResponseWithHeaders<SearchGetSearchAddressReverseBatchHeaders>> GetSearchAddressReverseBatchAsync(string format, CancellationToken cancellationToken = default)
+        {
+            if (format == null)
+            {
+                throw new ArgumentNullException(nameof(format));
+            }
+
+            using var message = CreateGetSearchAddressReverseBatchRequest(format);
+            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            var headers = new SearchGetSearchAddressReverseBatchHeaders(message.Response);
+            switch (message.Response.Status)
+            {
+                case 200:
+                case 202:
+                    return ResponseWithHeaders.FromValue(headers, message.Response);
+                default:
+                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// **Search Address Reverse Batch API**
+        /// 
+        /// 
+        /// **Applies to**: S1 pricing tier.
+        /// 
+        /// 
+        /// 
+        /// The Search Address Batch API sends batches of queries to [Search Address Reverse API](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse) using just a single API call. You can call Search Address Reverse Batch API to run either asynchronously (async) or synchronously (sync). The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries.
+        /// ### Submit Synchronous Batch Request
+        /// The Synchronous API is recommended for lightweight batch requests. When the service receives a request, it will respond as soon as the batch items are calculated and there will be no possibility to retrieve the results later. The Synchronous API will return a timeout error (a 408 response) if the request takes longer than 60 seconds. The number of batch items is limited to **100** for this API.
+        /// ```
+        /// POST https://atlas.microsoft.com/search/address/reverse/batch/sync/json?api-version=1.0&amp;subscription-key={subscription-key}
+        /// ```
+        /// ### Submit Asynchronous Batch Request
+        /// The Asynchronous API is appropriate for processing big volumes of relatively complex search requests
+        /// - It allows the retrieval of results in a separate call (multiple downloads are possible).
+        /// - The asynchronous API is optimized for reliability and is not expected to run into a timeout.
+        /// - The number of batch items is limited to **10,000** for this API.
+        /// 
+        /// When you make a request by using async request, by default the service returns a 202 response code along a redirect URL in the Location field of the response header. This URL should be checked periodically until the response data or error information is available.
+        /// The asynchronous responses are stored for **14** days. The redirect URL returns a 404 response if used after the expiration period.
+        /// 
+        /// Please note that asynchronous batch request is a long-running request. Here&apos;s a typical sequence of operations:
+        /// 1. Client sends a Search Address Batch `POST` request to Azure Maps
+        /// 2. The server will respond with one of the following:
+        /// 
+        ///     &gt; HTTP `202 Accepted` - Batch request has been accepted.
+        /// 
+        ///     &gt; HTTP `Error` - There was an error processing your Batch request. This could either be a `400 Bad Request` or any other `Error` status code.
+        /// 
+        /// 3. If the batch request was accepted successfully, the `Location` header in the response contains the URL to download the results of the batch request.
+        ///     This status URI looks like following:
+        /// 
+        /// ```
+        ///     GET https://atlas.microsoft.com/batch/{batch-id}?api-version=1.0&amp;subscription-key={subscription-key}
+        /// ```
+        /// 4. Client issues a `GET` request on the _download URL_ obtained in Step 3 to download the batch results.
+        /// 
+        /// ### POST Body for Batch Request
+        /// To send the _search address reverse_ queries you will use a `POST` request where the request body will contain the `batchItems` array in `json` format and the `Content-Type` header will be set to `application/json`. Here&apos;s a sample request body containing 5 _search address reverse_ queries:
+        /// 
+        /// 
+        /// ```json
+        /// {
+        ///     &quot;batchItems&quot;: [
+        ///         {&quot;query&quot;: &quot;?query=48.858561,2.294911&quot;},
+        ///         {&quot;query&quot;: &quot;?query=47.639765,-122.127896&amp;radius=5000&amp;limit=2&quot;},
+        ///         {&quot;query&quot;: &quot;?query=47.621028,-122.348170&quot;},
+        ///         {&quot;query&quot;: &quot;?query=43.722990,10.396695&quot;},
+        ///         {&quot;query&quot;: &quot;?query=40.750958,-73.982336&quot;}
+        ///     ]
+        /// }
+        /// ```
+        /// 
+        /// A _search address reverse_ query in a batch is just a partial URL _without_ the protocol, base URL, path, api-version and subscription-key. It can accept any of the supported _search address reverse_ [URI parameters](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse#uri-parameters). The string values in the _search address reverse_ query must be properly escaped (e.g. &quot; character should be escaped with \\ ) and it should also be properly URL-encoded.
+        /// 
+        /// 
+        /// The async API allows caller to batch up to **10,000** queries and sync API up to **100** queries, and the batch should contain at least **1** query.
+        /// 
+        /// 
+        /// ### Download Asynchronous Batch Results
+        /// To download the async batch results you will issue a `GET` request to the batch download endpoint. This _download URL_ can be obtained from the `Location` header of a successful `POST` batch request and looks like the following:
+        /// 
+        /// ```
+        /// https://atlas.microsoft.com/batch/{batch-id}?api-version=1.0&amp;subscription-key={subscription-key}
+        /// ```
+        /// Here&apos;s the typical sequence of operations for downloading the batch results:
+        /// 1. Client sends a `GET` request using the _download URL_.
+        /// 2. The server will respond with one of the following:
+        /// 
+        ///     &gt; HTTP `202 Accepted` - Batch request was accepted but is still being processed. Please try again in some time.
+        /// 
+        ///     &gt; HTTP `200 OK` - Batch request successfully processed. The response body contains all the batch results.
+        /// 
+        /// 
+        /// 
+        /// ### Batch Response Model
+        /// The returned data content is similar for async and sync requests. When downloading the results of an async batch request, if the batch has finished processing, the response body contains the batch response. This batch response contains a `summary` component that indicates the `totalRequests` that were part of the original batch request and `successfulRequests`i.e. queries which were executed successfully. The batch response also includes a `batchItems` array which contains a response for each and every query in the batch request. The `batchItems` will contain the results in the exact same order the original queries were sent in the batch request. Each item in `batchItems` contains `statusCode` and `response` fields. Each `response` in `batchItems` is of one of the following types:
+        /// 
+        ///   - [`SearchAddressReverseResponse`](https://docs.microsoft.com/en-us/rest/api/maps/search/getsearchaddressreverse#searchaddressreverseresponse) - If the query completed successfully.
+        /// 
+        ///   - `Error` - If the query failed. The response will contain a `code` and a `message` in this case.
+        /// 
+        /// 
+        /// Here&apos;s a sample Batch Response with 2 _successful_ and 1 _failed_ result:
+        /// 
+        /// 
+        /// ```json
+        /// {
+        ///     &quot;summary&quot;: {
+        ///         &quot;successfulRequests&quot;: 2,
+        ///         &quot;totalRequests&quot;: 3
+        ///     },
+        ///     &quot;batchItems&quot;: [
+        ///         {
+        ///             &quot;statusCode&quot;: 200,
+        ///             &quot;response&quot;:
+        ///             {
+        ///                 &quot;summary&quot;: {
+        ///                     &quot;queryTime&quot;: 11
+        ///                 },
+        ///                 &quot;addresses&quot;: [
+        ///                     {
+        ///                         &quot;address&quot;: {
+        ///                             &quot;country&quot;: &quot;France&quot;,
+        ///                             &quot;freeformAddress&quot;: &quot;Avenue Anatole France, 75007 Paris&quot;
+        ///                         },
+        ///                         &quot;position&quot;: &quot;48.858490,2.294820&quot;
+        ///                     }
+        ///                 ]
+        ///             }
+        ///         },
+        ///         {
+        ///             &quot;statusCode&quot;: 200,
+        ///             &quot;response&quot;:
+        ///             {
+        ///                 &quot;summary&quot;: {
+        ///                     &quot;queryTime&quot;: 1
+        ///                 },
+        ///                 &quot;addresses&quot;: [
+        ///                     {
+        ///                         &quot;address&quot;: {
+        ///                             &quot;country&quot;: &quot;United States of America&quot;,
+        ///                             &quot;freeformAddress&quot;: &quot;157th Pl NE, Redmond WA 98052&quot;
+        ///                         },
+        ///                         &quot;position&quot;: &quot;47.640470,-122.129430&quot;
+        ///                     }
+        ///                 ]
+        ///             }
+        ///         },
+        ///         {
+        ///             &quot;statusCode&quot;: 400,
+        ///             &quot;response&quot;:
+        ///             {
+        ///                 &quot;error&quot;:
+        ///                 {
+        ///                     &quot;code&quot;: &quot;400 BadRequest&quot;,
+        ///                     &quot;message&quot;: &quot;Bad request: one or more parameters were incorrectly specified or are mutually exclusive.&quot;
+        ///                 }
+        ///             }
+        ///         }
+        ///     ]
+        /// }
+        /// ```.
+        /// </summary>
+        /// <param name="format"> Batch id for querying the operation. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="format"/> is null. </exception>
+        public ResponseWithHeaders<SearchGetSearchAddressReverseBatchHeaders> GetSearchAddressReverseBatch(string format, CancellationToken cancellationToken = default)
+        {
+            if (format == null)
+            {
+                throw new ArgumentNullException(nameof(format));
+            }
+
+            using var message = CreateGetSearchAddressReverseBatchRequest(format);
+            _pipeline.Send(message, cancellationToken);
+            var headers = new SearchGetSearchAddressReverseBatchHeaders(message.Response);
+            switch (message.Response.Status)
+            {
+                case 200:
+                case 202:
+                    return ResponseWithHeaders.FromValue(headers, message.Response);
                 default:
                     throw _clientDiagnostics.CreateRequestFailedException(message.Response);
             }
