@@ -68,45 +68,6 @@ namespace Azure.Maps.Render
         }
 
         /// <summary> Initializes a new instance of RenderV2Client. </summary>
-        /// <param name="credential"> A credential used to authenticate to an Azure Service. </param>
-        /// <param name="geography"> This parameter specifies where the Azure Maps Creator resource is located.  Valid values are us and eu. </param>
-        /// <param name="xMsClientId"> Specifies which account is intended for usage in conjunction with the Azure AD security model.  It represents a unique ID for the Azure Maps account and can be retrieved from the Azure Maps management  plane Account API. To use Azure AD security in Azure Maps see the following [articles](https://aka.ms/amauthdetails) for guidance. </param>
-        /// <param name="options"> The options for configuring the client. </param>
-        public RenderV2Client(TokenCredential credential, Geography? geography = null, string xMsClientId = null, RenderClientOptions options = null)
-        {
-            if (credential == null)
-            {
-                throw new ArgumentNullException(nameof(credential));
-            }
-            geography ??= Geography.Us;
-
-            options ??= new RenderClientOptions();
-            _clientDiagnostics = new ClientDiagnostics(options);
-            string[] scopes = { "https://atlas.microsoft.com/.default" };
-            _pipeline = HttpPipelineBuilder.Build(options, new BearerTokenAuthenticationPolicy(credential, scopes));
-            RestClient = new RenderV2RestClient(_clientDiagnostics, _pipeline, geography, xMsClientId);
-        }
-
-        /// <summary> Initializes a new instance of RenderV2Client. </summary>
-        /// <param name="credential"> A credential used to authenticate to an Azure Service. </param>
-        /// <param name="geography"> This parameter specifies where the Azure Maps Creator resource is located.  Valid values are us and eu. </param>
-        /// <param name="xMsClientId"> Specifies which account is intended for usage in conjunction with the Azure AD security model.  It represents a unique ID for the Azure Maps account and can be retrieved from the Azure Maps management  plane Account API. To use Azure AD security in Azure Maps see the following [articles](https://aka.ms/amauthdetails) for guidance. </param>
-        /// <param name="options"> The options for configuring the client. </param>
-        public RenderV2Client(AzureKeyCredential credential, Geography? geography = null, string xMsClientId = null, RenderClientOptions options = null)
-        {
-            if (credential == null)
-            {
-                throw new ArgumentNullException(nameof(credential));
-            }
-            geography ??= Geography.Us;
-
-            options ??= new RenderClientOptions();
-            _clientDiagnostics = new ClientDiagnostics(options);
-            _pipeline = HttpPipelineBuilder.Build(options, new AzureKeyCredentialPolicy(credential, "subscription-key"));
-            RestClient = new RenderV2RestClient(_clientDiagnostics, _pipeline, geography, xMsClientId);
-        }
-
-        /// <summary> Initializes a new instance of RenderV2Client. </summary>
         /// <param name="clientDiagnostics"> The handler for diagnostic messaging in the client. </param>
         /// <param name="pipeline"> The HTTP pipeline for sending and receiving REST requests and responses. </param>
         /// <param name="geography"> This parameter specifies where the Azure Maps Creator resource is located.  Valid values are us and eu. </param>
