@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(RequiredTargetFrameworks)</TargetFrameworks>
+    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+    
     <AssemblyTitle>Microsoft Azure.Maps.Creator client library samples</AssemblyTitle>
     <Version>1.0.0-beta.1</Version>
     <PackageTags>Azure;Azure Maps;Maps Azure.Maps.Creator</PackageTags>
@@ -9,6 +11,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Identity" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)..\src\Azure.Maps.Creator.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\..\Microsoft.Azure.Management.Maps\src\Microsoft.Azure.Management.Maps.csproj" />
   </ItemGroup>
 </Project>
