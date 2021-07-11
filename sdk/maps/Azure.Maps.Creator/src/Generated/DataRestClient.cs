@@ -6,6 +6,7 @@
 #nullable disable
 
 using System;
+using System.Buffers;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
@@ -242,10 +243,27 @@ namespace Azure.Maps.Creator
                 request.Headers.Add("x-ms-client-id", xMsClientId);
             }
             request.Headers.Add("Accept", "application/json");
-            request.Headers.Add("Content-Type", "application/json");
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(uploadContent);
-            request.Content = content;
+            if(uploadContent is IUtf8JsonSerializable)
+            {
+                var content = new Utf8JsonRequestContent();
+                content.JsonWriter.WriteObjectValue(uploadContent);
+                request.Content = content;
+                request.Headers.SetValue("Content-Type", "application/json");
+            } 
+            else {
+                request.Headers.SetValue("Content-Type", "application/octet-stream");
+                if (uploadContent is BinaryData) request.Content = RequestContent.Create((BinaryData)uploadContent);
+                else if (uploadContent is Stream) request.Content = RequestContent.Create((Stream)uploadContent);
+                else if (uploadContent is byte[]) request.Content = RequestContent.Create((byte[])uploadContent);
+                else if (uploadContent is ReadOnlyMemory<byte>) request.Content = RequestContent.Create((ReadOnlyMemory<byte>)uploadContent);
+                else if (uploadContent is ReadOnlySequence<byte>) request.Content = RequestContent.Create((ReadOnlySequence<byte>)uploadContent);
+                else if (uploadContent is string) request.Content = RequestContent.Create((string)uploadContent);
+                else { 
+                    // current RequestContent internal implementation applies JsonObjectSerializer when serializer is not supplied
+                    request.Content = RequestContent.Create(uploadContent);
+                    request.Headers.SetValue("Content-Type", "application/json");
+                }
+            }
             return message;
         }
 
@@ -585,10 +603,27 @@ namespace Azure.Maps.Creator
                 request.Headers.Add("x-ms-client-id", xMsClientId);
             }
             request.Headers.Add("Accept", "application/json");
-            request.Headers.Add("Content-Type", "application/json");
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(updateContent);
-            request.Content = content;
+            if(updateContent is IUtf8JsonSerializable)
+            {
+                var content = new Utf8JsonRequestContent();
+                content.JsonWriter.WriteObjectValue(updateContent);
+                request.Content = content;
+                request.Headers.SetValue("Content-Type", "application/json");
+            } 
+            else {
+                request.Headers.SetValue("Content-Type", "application/octet-stream");
+                if (updateContent is BinaryData) request.Content = RequestContent.Create((BinaryData)updateContent);
+                else if (updateContent is Stream) request.Content = RequestContent.Create((Stream)updateContent);
+                else if (updateContent is byte[]) request.Content = RequestContent.Create((byte[])updateContent);
+                else if (updateContent is ReadOnlyMemory<byte>) request.Content = RequestContent.Create((ReadOnlyMemory<byte>)updateContent);
+                else if (updateContent is ReadOnlySequence<byte>) request.Content = RequestContent.Create((ReadOnlySequence<byte>)updateContent);
+                else if (updateContent is string) request.Content = RequestContent.Create((string)updateContent);
+                else { 
+                    // current RequestContent internal implementation applies JsonObjectSerializer when serializer is not supplied
+                    request.Content = RequestContent.Create(updateContent);
+                    request.Headers.SetValue("Content-Type", "application/json");
+                }
+            }
             return message;
         }
 
