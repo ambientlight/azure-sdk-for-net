@@ -43,7 +43,7 @@ namespace Azure.Maps.Creator
             options ??= new CreatorClientOptions();
             _clientDiagnostics = new ClientDiagnostics(options);
             string[] scopes = { "https://atlas.microsoft.com/.default" };
-            _pipeline = HttpPipelineBuilder.Build(options, new BearerTokenAuthenticationPolicy(credential, scopes));
+            _pipeline = HttpPipelineBuilder.Build(options, new BearerTokenAuthenticationPolicy(credential, scopes), new ClientIdPolicy(xMsClientId));
             RestClient = new SpatialRestClient(_clientDiagnostics, _pipeline, geography, xMsClientId);
         }
 

@@ -44,7 +44,7 @@ namespace Azure.Maps.Render
             options ??= new RenderClientOptions();
             _clientDiagnostics = new ClientDiagnostics(options);
             string[] scopes = { "https://atlas.microsoft.com/.default" };
-            _pipeline = HttpPipelineBuilder.Build(options, new BearerTokenAuthenticationPolicy(credential, scopes));
+            _pipeline = HttpPipelineBuilder.Build(options, new BearerTokenAuthenticationPolicy(credential, scopes), new ClientIdPolicy(xMsClientId));
             RestClient = new RenderV2RestClient(_clientDiagnostics, _pipeline, geography, xMsClientId);
         }
 

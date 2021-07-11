@@ -44,7 +44,7 @@ namespace Azure.Maps.Traffic
             options ??= new TrafficClientOptions();
             _clientDiagnostics = new ClientDiagnostics(options);
             string[] scopes = { "https://atlas.microsoft.com/.default" };
-            _pipeline = HttpPipelineBuilder.Build(options, new BearerTokenAuthenticationPolicy(credential, scopes));
+            _pipeline = HttpPipelineBuilder.Build(options, new BearerTokenAuthenticationPolicy(credential, scopes), new ClientIdPolicy(xMsClientId));
             RestClient = new TrafficRestClient(_clientDiagnostics, _pipeline, geography, xMsClientId, options.Version);
         }
 

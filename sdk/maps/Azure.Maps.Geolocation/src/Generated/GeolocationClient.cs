@@ -43,7 +43,7 @@ namespace Azure.Maps.Geolocation
             options ??= new GeolocationClientOptions();
             _clientDiagnostics = new ClientDiagnostics(options);
             string[] scopes = { "https://atlas.microsoft.com/.default" };
-            _pipeline = HttpPipelineBuilder.Build(options, new BearerTokenAuthenticationPolicy(credential, scopes));
+            _pipeline = HttpPipelineBuilder.Build(options, new BearerTokenAuthenticationPolicy(credential, scopes), new ClientIdPolicy(xMsClientId));
             RestClient = new GeolocationRestClient(_clientDiagnostics, _pipeline, geography, xMsClientId, options.Version);
         }
 

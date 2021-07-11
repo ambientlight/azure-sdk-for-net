@@ -44,7 +44,7 @@ namespace Azure.Maps.Elevation
             options ??= new ElevationClientOptions();
             _clientDiagnostics = new ClientDiagnostics(options);
             string[] scopes = { "https://atlas.microsoft.com/.default" };
-            _pipeline = HttpPipelineBuilder.Build(options, new BearerTokenAuthenticationPolicy(credential, scopes));
+            _pipeline = HttpPipelineBuilder.Build(options, new BearerTokenAuthenticationPolicy(credential, scopes), new ClientIdPolicy(xMsClientId));
             RestClient = new ElevationRestClient(_clientDiagnostics, _pipeline, geography, xMsClientId, options.Version);
         }
 
