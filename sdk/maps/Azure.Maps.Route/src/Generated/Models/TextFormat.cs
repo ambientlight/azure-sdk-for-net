@@ -15,7 +15,7 @@ namespace Azure.Maps.Route.Models
     {
         private readonly string _value;
 
-        /// <summary> Determines if two <see cref="TextFormat"/> values are the same. </summary>
+        /// <summary> Initializes a new instance of <see cref="TextFormat"/>. </summary>
         /// <exception cref="ArgumentNullException"> <paramref name="value"/> is null. </exception>
         public TextFormat(string value)
         {

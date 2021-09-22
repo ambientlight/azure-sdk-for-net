@@ -33,7 +33,7 @@ namespace Azure.Maps.Route
         /// <param name="geography"> This parameter specifies where the Azure Maps Creator resource is located.  Valid values are us and eu. </param>
         /// <param name="xMsClientId"> Specifies which account is intended for usage in conjunction with the Azure AD security model.  It represents a unique ID for the Azure Maps account and can be retrieved from the Azure Maps management  plane Account API. To use Azure AD security in Azure Maps see the following [articles](https://aka.ms/amauthdetails) for guidance. </param>
         /// <param name="options"> The options for configuring the client. </param>
-        public RouteClient(TokenCredential credential, Geography? geography = null, string xMsClientId = null, RouteClientOptions options = null)
+        public RouteClient(TokenCredential credential, Geography? geography = default, string xMsClientId = null, RouteClientOptions options = null)
         {
             if (credential == null)
             {
@@ -44,7 +44,7 @@ namespace Azure.Maps.Route
             options ??= new RouteClientOptions();
             _clientDiagnostics = new ClientDiagnostics(options);
             string[] scopes = { "https://atlas.microsoft.com/.default" };
-            _pipeline = HttpPipelineBuilder.Build(options, new BearerTokenAuthenticationPolicy(credential, scopes), new ClientIdPolicy(xMsClientId));
+            _pipeline = HttpPipelineBuilder.Build(options, new BearerTokenAuthenticationPolicy(credential, scopes));
             RestClient = new RouteRestClient(_clientDiagnostics, _pipeline, geography, xMsClientId, options.Version);
         }
 
@@ -53,7 +53,7 @@ namespace Azure.Maps.Route
         /// <param name="geography"> This parameter specifies where the Azure Maps Creator resource is located.  Valid values are us and eu. </param>
         /// <param name="xMsClientId"> Specifies which account is intended for usage in conjunction with the Azure AD security model.  It represents a unique ID for the Azure Maps account and can be retrieved from the Azure Maps management  plane Account API. To use Azure AD security in Azure Maps see the following [articles](https://aka.ms/amauthdetails) for guidance. </param>
         /// <param name="options"> The options for configuring the client. </param>
-        public RouteClient(AzureKeyCredential credential, Geography? geography = null, string xMsClientId = null, RouteClientOptions options = null)
+        public RouteClient(AzureKeyCredential credential, Geography? geography = default, string xMsClientId = null, RouteClientOptions options = null)
         {
             if (credential == null)
             {
@@ -73,7 +73,7 @@ namespace Azure.Maps.Route
         /// <param name="geography"> This parameter specifies where the Azure Maps Creator resource is located.  Valid values are us and eu. </param>
         /// <param name="xMsClientId"> Specifies which account is intended for usage in conjunction with the Azure AD security model.  It represents a unique ID for the Azure Maps account and can be retrieved from the Azure Maps management  plane Account API. To use Azure AD security in Azure Maps see the following [articles](https://aka.ms/amauthdetails) for guidance. </param>
         /// <param name="apiVersion"> Api Version. </param>
-        internal RouteClient(ClientDiagnostics clientDiagnostics, HttpPipeline pipeline, Geography? geography = null, string xMsClientId = null, string apiVersion = "1.0")
+        internal RouteClient(ClientDiagnostics clientDiagnostics, HttpPipeline pipeline, Geography? geography = default, string xMsClientId = null, string apiVersion = "1.0")
         {
             RestClient = new RouteRestClient(clientDiagnostics, pipeline, geography, xMsClientId, apiVersion);
             _clientDiagnostics = clientDiagnostics;
@@ -81,7 +81,6 @@ namespace Azure.Maps.Route
         }
 
         /// <summary>
-        /// 
         /// 
         /// **Applies to**: S1 pricing tier.
         /// 
@@ -164,7 +163,7 @@ namespace Azure.Maps.Route
         /// <param name="vehicleHeight"> Height of the vehicle in meters. A value of 0 means that height restrictions are not considered. </param>
         /// <param name="vehicleWidth"> Width of the vehicle in meters. A value of 0 means that width restrictions are not considered. </param>
         /// <param name="vehicleMaxSpeed">
-        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways.
+        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways. 
         /// 
         /// * A value of 0 means that an appropriate value for the vehicle will be determined and applied during route planning.
         /// 
@@ -176,9 +175,9 @@ namespace Azure.Maps.Route
         /// <param name="travelMode"> The mode of travel for the requested route. If not defined, default is &apos;car&apos;. Note that the requested travelMode may not be available for the entire route. Where the requested travelMode is not available for a particular section, the travelMode element of the response for that section will be &quot;other&quot;. Note that travel modes bus, motorcycle, taxi and van are BETA functionality. Full restriction data is not available in all areas. In **calculateReachableRange** requests, the values bicycle and pedestrian must not be used. </param>
         /// <param name="avoid"> Specifies something that the route calculation should try to avoid when determining the route. Can be specified multiple times in one request, for example, &apos;&amp;avoid=motorways&amp;avoid=tollRoads&amp;avoid=ferries&apos;. In calculateReachableRange requests, the value alreadyUsedRoads must not be used. </param>
         /// <param name="traffic">
-        /// Possible values:
+        /// Possible values: 
         ///   * true - Do consider all available traffic information during routing
-        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored
+        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored 
         ///   during routing, the effect of historic traffic on effective road speeds is still incorporated.
         /// </param>
         /// <param name="routeType"> The type of route requested. </param>
@@ -201,7 +200,6 @@ namespace Azure.Maps.Route
 
         /// <summary>
         /// 
-        /// 
         /// **Applies to**: S1 pricing tier.
         /// 
         /// The Matrix Routing service allows calculation of a matrix of route summaries for a set of routes defined by origin and destination locations by using an asynchronous (async) or synchronous (sync) POST request. For every given origin, the service calculates the cost of routing from that origin to every given destination. The set of origins and the set of destinations can be thought of as the column and row headers of a table and each cell in the table contains the costs of routing from the origin to the destination for that cell. As an example, let&apos;s say a food delivery company has 20 drivers and they need to find the closest driver to pick up the delivery from the restaurant. To solve this use case, they can call Matrix Route API.
@@ -283,7 +281,7 @@ namespace Azure.Maps.Route
         /// <param name="vehicleHeight"> Height of the vehicle in meters. A value of 0 means that height restrictions are not considered. </param>
         /// <param name="vehicleWidth"> Width of the vehicle in meters. A value of 0 means that width restrictions are not considered. </param>
         /// <param name="vehicleMaxSpeed">
-        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways.
+        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways. 
         /// 
         /// * A value of 0 means that an appropriate value for the vehicle will be determined and applied during route planning.
         /// 
@@ -295,9 +293,9 @@ namespace Azure.Maps.Route
         /// <param name="travelMode"> The mode of travel for the requested route. If not defined, default is &apos;car&apos;. Note that the requested travelMode may not be available for the entire route. Where the requested travelMode is not available for a particular section, the travelMode element of the response for that section will be &quot;other&quot;. Note that travel modes bus, motorcycle, taxi and van are BETA functionality. Full restriction data is not available in all areas. In **calculateReachableRange** requests, the values bicycle and pedestrian must not be used. </param>
         /// <param name="avoid"> Specifies something that the route calculation should try to avoid when determining the route. Can be specified multiple times in one request, for example, &apos;&amp;avoid=motorways&amp;avoid=tollRoads&amp;avoid=ferries&apos;. In calculateReachableRange requests, the value alreadyUsedRoads must not be used. </param>
         /// <param name="traffic">
-        /// Possible values:
+        /// Possible values: 
         ///   * true - Do consider all available traffic information during routing
-        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored
+        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored 
         ///   during routing, the effect of historic traffic on effective road speeds is still incorporated.
         /// </param>
         /// <param name="routeType"> The type of route requested. </param>
@@ -357,7 +355,7 @@ namespace Azure.Maps.Route
         /// <param name="language">
         /// The language parameter determines the language of the guidance messages. Proper nouns (the names of streets, plazas, etc.) are returned in the specified  language, or if that is not available, they are returned in an available language  that is close to it. Allowed values are (a subset of) the IETF language tags. The currently supported  languages are listed in the [Supported languages  section](https://docs.microsoft.com/azure/azure-maps/supported-languages).
         /// 
-        /// Default value: en-GB.
+        /// Default value: en-GB
         /// </param>
         /// <param name="computeBestOrder"> Re-order the route waypoints using a fast heuristic algorithm to reduce the route length. Yields best results when used in conjunction with routeType _shortest_. Notice that origin and destination are excluded from the optimized waypoint indices. To include origin and destination in the response, please increase all the indices by 1 to account for the origin, and then add the destination as the final index. Possible values are true or false. True computes a better order if possible, but is not allowed to be used in conjunction with maxAlternatives value greater than 0 or in conjunction with circle waypoints. False will use the locations in the given order and not allowed to be used in conjunction with routeRepresentation _none_. </param>
         /// <param name="routeRepresentation"> Specifies the representation of the set of routes provided as response. This parameter value can only be used in conjunction with computeBestOrder=true. </param>
@@ -370,7 +368,7 @@ namespace Azure.Maps.Route
         /// <param name="vehicleHeight"> Height of the vehicle in meters. A value of 0 means that height restrictions are not considered. </param>
         /// <param name="vehicleLength"> Length of the vehicle in meters. A value of 0 means that length restrictions are not considered. </param>
         /// <param name="vehicleMaxSpeed">
-        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways.
+        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways. 
         /// 
         /// * A value of 0 means that an appropriate value for the vehicle will be determined and applied during route planning.
         /// 
@@ -387,7 +385,7 @@ namespace Azure.Maps.Route
         /// 
         /// * In all other cases, this parameter is ignored.
         /// 
-        /// Sensible Values : for **Combustion Model** : 1600, for **Electric Model** : 1900.
+        /// Sensible Values : for **Combustion Model** : 1600, for **Electric Model** : 1900
         /// </param>
         /// <param name="vehicleCommercial"> Vehicle is used for commercial purposes and thus may not be allowed to drive  on some roads. </param>
         /// <param name="windingness"> Level of turns for thrilling route. This parameter can only be used in conjunction with `routeType`=thrilling. </param>
@@ -395,16 +393,15 @@ namespace Azure.Maps.Route
         /// <param name="travelMode"> The mode of travel for the requested route. If not defined, default is &apos;car&apos;. Note that the requested travelMode may not be available for the entire route. Where the requested travelMode is not available for a particular section, the travelMode element of the response for that section will be &quot;other&quot;. Note that travel modes bus, motorcycle, taxi and van are BETA functionality. Full restriction data is not available in all areas. In **calculateReachableRange** requests, the values bicycle and pedestrian must not be used. </param>
         /// <param name="avoid"> Specifies something that the route calculation should try to avoid when determining the route. Can be specified multiple times in one request, for example, &apos;&amp;avoid=motorways&amp;avoid=tollRoads&amp;avoid=ferries&apos;. In calculateReachableRange requests, the value alreadyUsedRoads must not be used. </param>
         /// <param name="traffic">
-        /// Possible values:
+        /// Possible values: 
         ///   * true - Do consider all available traffic information during routing
-        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored
+        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored 
         ///   during routing, the effect of historic traffic on effective road speeds is still incorporated.
         /// </param>
         /// <param name="routeType"> The type of route requested. </param>
         /// <param name="vehicleLoadType"> Types of cargo that may be classified as hazardous materials and restricted from some roads. Available vehicleLoadType values are US Hazmat classes 1 through 9, plus generic classifications for use in other countries. Values beginning with USHazmat are for US routing while otherHazmat should be used for all other countries. vehicleLoadType can be specified multiple times. This parameter is currently only considered for travelMode=truck. </param>
         /// <param name="vehicleEngineType"> Engine type of the vehicle. When a detailed Consumption Model is specified, it must be consistent with the value of **vehicleEngineType**. </param>
         /// <param name="constantSpeedConsumptionInLitersPerHundredkm">
-        /// 
         /// 
         /// Specifies the speed-dependent component of consumption.
         /// 
@@ -429,21 +426,21 @@ namespace Azure.Maps.Route
         /// <param name="currentFuelInLiters">
         /// Specifies the current supply of fuel in liters.
         /// 
-        /// Sensible Values : 55.
+        /// Sensible Values : 55
         /// </param>
         /// <param name="auxiliaryPowerInLitersPerHour">
         /// Specifies the amount of fuel consumed for sustaining auxiliary systems of the vehicle, in liters per hour.
         /// 
         /// It can be used to specify consumption due to devices and systems such as AC systems, radio, heating, etc.
         /// 
-        /// Sensible Values : 0.2.
+        /// Sensible Values : 0.2
         /// </param>
         /// <param name="fuelEnergyDensityInMJoulesPerLiter">
         /// Specifies the amount of chemical energy stored in one liter of fuel in megajoules (MJ). It is used in conjunction with the ***Efficiency** parameters for conversions between saved or consumed energy and fuel. For example, energy density is 34.2 MJ/l for gasoline, and 35.8 MJ/l for Diesel fuel.
         /// 
         /// This parameter is required if any ***Efficiency** parameter is set.
         /// 
-        /// Sensible Values : 34.2.
+        /// Sensible Values : 34.2
         /// </param>
         /// <param name="accelerationEfficiency">
         /// Specifies the efficiency of converting chemical energy stored in fuel to kinetic energy when the vehicle accelerates _(i.e. KineticEnergyGained/ChemicalEnergyConsumed). ChemicalEnergyConsumed_ is obtained by converting consumed fuel to chemical energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -452,7 +449,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**decelerationEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.33, for **Electric Model** : 0.66.
+        /// Sensible Values : for **Combustion Model** : 0.33, for **Electric Model** : 0.66
         /// </param>
         /// <param name="decelerationEfficiency">
         /// Specifies the efficiency of converting kinetic energy to saved (not consumed) fuel when the vehicle decelerates _(i.e. ChemicalEnergySaved/KineticEnergyLost). ChemicalEnergySaved_ is obtained by converting saved (not consumed) fuel to energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -461,7 +458,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**accelerationEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.83, for **Electric Model** : 0.91.
+        /// Sensible Values : for **Combustion Model** : 0.83, for **Electric Model** : 0.91
         /// </param>
         /// <param name="uphillEfficiency">
         /// Specifies the efficiency of converting chemical energy stored in fuel to potential energy when the vehicle gains elevation _(i.e. PotentialEnergyGained/ChemicalEnergyConsumed). ChemicalEnergyConsumed_ is obtained by converting consumed fuel to chemical energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -470,7 +467,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**downhillEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.27, for **Electric Model** : 0.74.
+        /// Sensible Values : for **Combustion Model** : 0.27, for **Electric Model** : 0.74
         /// </param>
         /// <param name="downhillEfficiency">
         /// Specifies the efficiency of converting potential energy to saved (not consumed) fuel when the vehicle loses elevation _(i.e. ChemicalEnergySaved/PotentialEnergyLost). ChemicalEnergySaved_ is obtained by converting saved (not consumed) fuel to energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -479,7 +476,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**uphillEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.51, for **Electric Model** : 0.73.
+        /// Sensible Values : for **Combustion Model** : 0.51, for **Electric Model** : 0.73
         /// </param>
         /// <param name="constantSpeedConsumptionInkWhPerHundredkm">
         /// Specifies the speed-dependent component of consumption.
@@ -509,7 +506,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to **maxChargeInkWh**.
         /// 
-        /// Sensible Values : 43.
+        /// Sensible Values : 43
         /// </param>
         /// <param name="maxChargeInkWh">
         /// Specifies the maximum electric energy supply in kilowatt hours (kWh) that may be stored in the vehicle&apos;s battery.
@@ -518,14 +515,14 @@ namespace Azure.Maps.Route
         /// 
         /// Minimum value has to be greater than or equal to **currentChargeInkWh**.
         /// 
-        /// Sensible Values : 85.
+        /// Sensible Values : 85
         /// </param>
         /// <param name="auxiliaryPowerInkW">
         /// Specifies the amount of power consumed for sustaining auxiliary systems, in kilowatts (kW).
         /// 
         /// It can be used to specify consumption due to devices and systems such as AC systems, radio, heating, etc.
         /// 
-        /// Sensible Values : 1.7.
+        /// Sensible Values : 1.7
         /// </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         public virtual async Task<Response<RouteDirectionsResponse>> GetRouteDirectionsAsync(TextFormat format, string query, int? maxAlternatives = null, AlternativeRouteType? alternativeType = null, int? minDeviationDistance = null, DateTimeOffset? arriveAt = null, DateTimeOffset? departAt = null, int? minDeviationTime = null, RouteInstructionsType? instructionsType = null, string language = null, bool? computeBestOrder = null, RouteRepresentation? routeRepresentation = null, ComputeTravelTimeFor? computeTravelTimeFor = null, int? vehicleHeading = null, string report = null, SectionType? sectionType = null, int? vehicleAxleWeight = null, float? vehicleWidth = null, float? vehicleHeight = null, float? vehicleLength = null, int? vehicleMaxSpeed = null, int? vehicleWeight = null, bool? vehicleCommercial = null, WindingnessLevel? windingness = null, HillinessDegree? hilliness = null, TravelMode? travelMode = null, IEnumerable<RouteAvoidType> avoid = null, bool? traffic = null, RouteType? routeType = null, VehicleLoadType? vehicleLoadType = null, VehicleEngineType? vehicleEngineType = null, float? constantSpeedConsumptionInLitersPerHundredkm = null, float? currentFuelInLiters = null, float? auxiliaryPowerInLitersPerHour = null, float? fuelEnergyDensityInMJoulesPerLiter = null, float? accelerationEfficiency = null, float? decelerationEfficiency = null, float? uphillEfficiency = null, float? downhillEfficiency = null, string constantSpeedConsumptionInkWhPerHundredkm = null, string currentChargeInkWh = null, string maxChargeInkWh = null, string auxiliaryPowerInkW = null, CancellationToken cancellationToken = default)
@@ -582,7 +579,7 @@ namespace Azure.Maps.Route
         /// <param name="language">
         /// The language parameter determines the language of the guidance messages. Proper nouns (the names of streets, plazas, etc.) are returned in the specified  language, or if that is not available, they are returned in an available language  that is close to it. Allowed values are (a subset of) the IETF language tags. The currently supported  languages are listed in the [Supported languages  section](https://docs.microsoft.com/azure/azure-maps/supported-languages).
         /// 
-        /// Default value: en-GB.
+        /// Default value: en-GB
         /// </param>
         /// <param name="computeBestOrder"> Re-order the route waypoints using a fast heuristic algorithm to reduce the route length. Yields best results when used in conjunction with routeType _shortest_. Notice that origin and destination are excluded from the optimized waypoint indices. To include origin and destination in the response, please increase all the indices by 1 to account for the origin, and then add the destination as the final index. Possible values are true or false. True computes a better order if possible, but is not allowed to be used in conjunction with maxAlternatives value greater than 0 or in conjunction with circle waypoints. False will use the locations in the given order and not allowed to be used in conjunction with routeRepresentation _none_. </param>
         /// <param name="routeRepresentation"> Specifies the representation of the set of routes provided as response. This parameter value can only be used in conjunction with computeBestOrder=true. </param>
@@ -595,7 +592,7 @@ namespace Azure.Maps.Route
         /// <param name="vehicleHeight"> Height of the vehicle in meters. A value of 0 means that height restrictions are not considered. </param>
         /// <param name="vehicleLength"> Length of the vehicle in meters. A value of 0 means that length restrictions are not considered. </param>
         /// <param name="vehicleMaxSpeed">
-        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways.
+        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways. 
         /// 
         /// * A value of 0 means that an appropriate value for the vehicle will be determined and applied during route planning.
         /// 
@@ -612,7 +609,7 @@ namespace Azure.Maps.Route
         /// 
         /// * In all other cases, this parameter is ignored.
         /// 
-        /// Sensible Values : for **Combustion Model** : 1600, for **Electric Model** : 1900.
+        /// Sensible Values : for **Combustion Model** : 1600, for **Electric Model** : 1900
         /// </param>
         /// <param name="vehicleCommercial"> Vehicle is used for commercial purposes and thus may not be allowed to drive  on some roads. </param>
         /// <param name="windingness"> Level of turns for thrilling route. This parameter can only be used in conjunction with `routeType`=thrilling. </param>
@@ -620,16 +617,15 @@ namespace Azure.Maps.Route
         /// <param name="travelMode"> The mode of travel for the requested route. If not defined, default is &apos;car&apos;. Note that the requested travelMode may not be available for the entire route. Where the requested travelMode is not available for a particular section, the travelMode element of the response for that section will be &quot;other&quot;. Note that travel modes bus, motorcycle, taxi and van are BETA functionality. Full restriction data is not available in all areas. In **calculateReachableRange** requests, the values bicycle and pedestrian must not be used. </param>
         /// <param name="avoid"> Specifies something that the route calculation should try to avoid when determining the route. Can be specified multiple times in one request, for example, &apos;&amp;avoid=motorways&amp;avoid=tollRoads&amp;avoid=ferries&apos;. In calculateReachableRange requests, the value alreadyUsedRoads must not be used. </param>
         /// <param name="traffic">
-        /// Possible values:
+        /// Possible values: 
         ///   * true - Do consider all available traffic information during routing
-        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored
+        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored 
         ///   during routing, the effect of historic traffic on effective road speeds is still incorporated.
         /// </param>
         /// <param name="routeType"> The type of route requested. </param>
         /// <param name="vehicleLoadType"> Types of cargo that may be classified as hazardous materials and restricted from some roads. Available vehicleLoadType values are US Hazmat classes 1 through 9, plus generic classifications for use in other countries. Values beginning with USHazmat are for US routing while otherHazmat should be used for all other countries. vehicleLoadType can be specified multiple times. This parameter is currently only considered for travelMode=truck. </param>
         /// <param name="vehicleEngineType"> Engine type of the vehicle. When a detailed Consumption Model is specified, it must be consistent with the value of **vehicleEngineType**. </param>
         /// <param name="constantSpeedConsumptionInLitersPerHundredkm">
-        /// 
         /// 
         /// Specifies the speed-dependent component of consumption.
         /// 
@@ -654,21 +650,21 @@ namespace Azure.Maps.Route
         /// <param name="currentFuelInLiters">
         /// Specifies the current supply of fuel in liters.
         /// 
-        /// Sensible Values : 55.
+        /// Sensible Values : 55
         /// </param>
         /// <param name="auxiliaryPowerInLitersPerHour">
         /// Specifies the amount of fuel consumed for sustaining auxiliary systems of the vehicle, in liters per hour.
         /// 
         /// It can be used to specify consumption due to devices and systems such as AC systems, radio, heating, etc.
         /// 
-        /// Sensible Values : 0.2.
+        /// Sensible Values : 0.2
         /// </param>
         /// <param name="fuelEnergyDensityInMJoulesPerLiter">
         /// Specifies the amount of chemical energy stored in one liter of fuel in megajoules (MJ). It is used in conjunction with the ***Efficiency** parameters for conversions between saved or consumed energy and fuel. For example, energy density is 34.2 MJ/l for gasoline, and 35.8 MJ/l for Diesel fuel.
         /// 
         /// This parameter is required if any ***Efficiency** parameter is set.
         /// 
-        /// Sensible Values : 34.2.
+        /// Sensible Values : 34.2
         /// </param>
         /// <param name="accelerationEfficiency">
         /// Specifies the efficiency of converting chemical energy stored in fuel to kinetic energy when the vehicle accelerates _(i.e. KineticEnergyGained/ChemicalEnergyConsumed). ChemicalEnergyConsumed_ is obtained by converting consumed fuel to chemical energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -677,7 +673,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**decelerationEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.33, for **Electric Model** : 0.66.
+        /// Sensible Values : for **Combustion Model** : 0.33, for **Electric Model** : 0.66
         /// </param>
         /// <param name="decelerationEfficiency">
         /// Specifies the efficiency of converting kinetic energy to saved (not consumed) fuel when the vehicle decelerates _(i.e. ChemicalEnergySaved/KineticEnergyLost). ChemicalEnergySaved_ is obtained by converting saved (not consumed) fuel to energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -686,7 +682,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**accelerationEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.83, for **Electric Model** : 0.91.
+        /// Sensible Values : for **Combustion Model** : 0.83, for **Electric Model** : 0.91
         /// </param>
         /// <param name="uphillEfficiency">
         /// Specifies the efficiency of converting chemical energy stored in fuel to potential energy when the vehicle gains elevation _(i.e. PotentialEnergyGained/ChemicalEnergyConsumed). ChemicalEnergyConsumed_ is obtained by converting consumed fuel to chemical energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -695,7 +691,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**downhillEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.27, for **Electric Model** : 0.74.
+        /// Sensible Values : for **Combustion Model** : 0.27, for **Electric Model** : 0.74
         /// </param>
         /// <param name="downhillEfficiency">
         /// Specifies the efficiency of converting potential energy to saved (not consumed) fuel when the vehicle loses elevation _(i.e. ChemicalEnergySaved/PotentialEnergyLost). ChemicalEnergySaved_ is obtained by converting saved (not consumed) fuel to energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -704,7 +700,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**uphillEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.51, for **Electric Model** : 0.73.
+        /// Sensible Values : for **Combustion Model** : 0.51, for **Electric Model** : 0.73
         /// </param>
         /// <param name="constantSpeedConsumptionInkWhPerHundredkm">
         /// Specifies the speed-dependent component of consumption.
@@ -734,7 +730,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to **maxChargeInkWh**.
         /// 
-        /// Sensible Values : 43.
+        /// Sensible Values : 43
         /// </param>
         /// <param name="maxChargeInkWh">
         /// Specifies the maximum electric energy supply in kilowatt hours (kWh) that may be stored in the vehicle&apos;s battery.
@@ -743,14 +739,14 @@ namespace Azure.Maps.Route
         /// 
         /// Minimum value has to be greater than or equal to **currentChargeInkWh**.
         /// 
-        /// Sensible Values : 85.
+        /// Sensible Values : 85
         /// </param>
         /// <param name="auxiliaryPowerInkW">
         /// Specifies the amount of power consumed for sustaining auxiliary systems, in kilowatts (kW).
         /// 
         /// It can be used to specify consumption due to devices and systems such as AC systems, radio, heating, etc.
         /// 
-        /// Sensible Values : 1.7.
+        /// Sensible Values : 1.7
         /// </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         public virtual Response<RouteDirectionsResponse> GetRouteDirections(TextFormat format, string query, int? maxAlternatives = null, AlternativeRouteType? alternativeType = null, int? minDeviationDistance = null, DateTimeOffset? arriveAt = null, DateTimeOffset? departAt = null, int? minDeviationTime = null, RouteInstructionsType? instructionsType = null, string language = null, bool? computeBestOrder = null, RouteRepresentation? routeRepresentation = null, ComputeTravelTimeFor? computeTravelTimeFor = null, int? vehicleHeading = null, string report = null, SectionType? sectionType = null, int? vehicleAxleWeight = null, float? vehicleWidth = null, float? vehicleHeight = null, float? vehicleLength = null, int? vehicleMaxSpeed = null, int? vehicleWeight = null, bool? vehicleCommercial = null, WindingnessLevel? windingness = null, HillinessDegree? hilliness = null, TravelMode? travelMode = null, IEnumerable<RouteAvoidType> avoid = null, bool? traffic = null, RouteType? routeType = null, VehicleLoadType? vehicleLoadType = null, VehicleEngineType? vehicleEngineType = null, float? constantSpeedConsumptionInLitersPerHundredkm = null, float? currentFuelInLiters = null, float? auxiliaryPowerInLitersPerHour = null, float? fuelEnergyDensityInMJoulesPerLiter = null, float? accelerationEfficiency = null, float? decelerationEfficiency = null, float? uphillEfficiency = null, float? downhillEfficiency = null, string constantSpeedConsumptionInkWhPerHundredkm = null, string currentChargeInkWh = null, string maxChargeInkWh = null, string auxiliaryPowerInkW = null, CancellationToken cancellationToken = default)
@@ -827,7 +823,7 @@ namespace Azure.Maps.Route
         /// <param name="vehicleHeight"> Height of the vehicle in meters. A value of 0 means that height restrictions are not considered. </param>
         /// <param name="vehicleWidth"> Width of the vehicle in meters. A value of 0 means that width restrictions are not considered. </param>
         /// <param name="vehicleMaxSpeed">
-        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways.
+        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways. 
         /// 
         /// * A value of 0 means that an appropriate value for the vehicle will be determined and applied during route planning.
         /// 
@@ -844,7 +840,7 @@ namespace Azure.Maps.Route
         /// 
         /// * In all other cases, this parameter is ignored.
         /// 
-        /// Sensible Values : for **Combustion Model** : 1600, for **Electric Model** : 1900.
+        /// Sensible Values : for **Combustion Model** : 1600, for **Electric Model** : 1900
         /// </param>
         /// <param name="vehicleCommercial"> Vehicle is used for commercial purposes and thus may not be allowed to drive  on some roads. </param>
         /// <param name="windingness"> Level of turns for thrilling route. This parameter can only be used in conjunction with `routeType`=thrilling. </param>
@@ -852,16 +848,15 @@ namespace Azure.Maps.Route
         /// <param name="travelMode"> The mode of travel for the requested route. If not defined, default is &apos;car&apos;. Note that the requested travelMode may not be available for the entire route. Where the requested travelMode is not available for a particular section, the travelMode element of the response for that section will be &quot;other&quot;. Note that travel modes bus, motorcycle, taxi and van are BETA functionality. Full restriction data is not available in all areas. In **calculateReachableRange** requests, the values bicycle and pedestrian must not be used. </param>
         /// <param name="avoid"> Specifies something that the route calculation should try to avoid when determining the route. Can be specified multiple times in one request, for example, &apos;&amp;avoid=motorways&amp;avoid=tollRoads&amp;avoid=ferries&apos;. In calculateReachableRange requests, the value alreadyUsedRoads must not be used. </param>
         /// <param name="traffic">
-        /// Possible values:
+        /// Possible values: 
         ///   * true - Do consider all available traffic information during routing
-        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored
+        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored 
         ///   during routing, the effect of historic traffic on effective road speeds is still incorporated.
         /// </param>
         /// <param name="routeType"> The type of route requested. </param>
         /// <param name="vehicleLoadType"> Types of cargo that may be classified as hazardous materials and restricted from some roads. Available vehicleLoadType values are US Hazmat classes 1 through 9, plus generic classifications for use in other countries. Values beginning with USHazmat are for US routing while otherHazmat should be used for all other countries. vehicleLoadType can be specified multiple times. This parameter is currently only considered for travelMode=truck. </param>
         /// <param name="vehicleEngineType"> Engine type of the vehicle. When a detailed Consumption Model is specified, it must be consistent with the value of **vehicleEngineType**. </param>
         /// <param name="constantSpeedConsumptionInLitersPerHundredkm">
-        /// 
         /// 
         /// Specifies the speed-dependent component of consumption.
         /// 
@@ -886,21 +881,21 @@ namespace Azure.Maps.Route
         /// <param name="currentFuelInLiters">
         /// Specifies the current supply of fuel in liters.
         /// 
-        /// Sensible Values : 55.
+        /// Sensible Values : 55
         /// </param>
         /// <param name="auxiliaryPowerInLitersPerHour">
         /// Specifies the amount of fuel consumed for sustaining auxiliary systems of the vehicle, in liters per hour.
         /// 
         /// It can be used to specify consumption due to devices and systems such as AC systems, radio, heating, etc.
         /// 
-        /// Sensible Values : 0.2.
+        /// Sensible Values : 0.2
         /// </param>
         /// <param name="fuelEnergyDensityInMJoulesPerLiter">
         /// Specifies the amount of chemical energy stored in one liter of fuel in megajoules (MJ). It is used in conjunction with the ***Efficiency** parameters for conversions between saved or consumed energy and fuel. For example, energy density is 34.2 MJ/l for gasoline, and 35.8 MJ/l for Diesel fuel.
         /// 
         /// This parameter is required if any ***Efficiency** parameter is set.
         /// 
-        /// Sensible Values : 34.2.
+        /// Sensible Values : 34.2
         /// </param>
         /// <param name="accelerationEfficiency">
         /// Specifies the efficiency of converting chemical energy stored in fuel to kinetic energy when the vehicle accelerates _(i.e. KineticEnergyGained/ChemicalEnergyConsumed). ChemicalEnergyConsumed_ is obtained by converting consumed fuel to chemical energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -909,7 +904,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**decelerationEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.33, for **Electric Model** : 0.66.
+        /// Sensible Values : for **Combustion Model** : 0.33, for **Electric Model** : 0.66
         /// </param>
         /// <param name="decelerationEfficiency">
         /// Specifies the efficiency of converting kinetic energy to saved (not consumed) fuel when the vehicle decelerates _(i.e. ChemicalEnergySaved/KineticEnergyLost). ChemicalEnergySaved_ is obtained by converting saved (not consumed) fuel to energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -918,7 +913,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**accelerationEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.83, for **Electric Model** : 0.91.
+        /// Sensible Values : for **Combustion Model** : 0.83, for **Electric Model** : 0.91
         /// </param>
         /// <param name="uphillEfficiency">
         /// Specifies the efficiency of converting chemical energy stored in fuel to potential energy when the vehicle gains elevation _(i.e. PotentialEnergyGained/ChemicalEnergyConsumed). ChemicalEnergyConsumed_ is obtained by converting consumed fuel to chemical energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -927,7 +922,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**downhillEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.27, for **Electric Model** : 0.74.
+        /// Sensible Values : for **Combustion Model** : 0.27, for **Electric Model** : 0.74
         /// </param>
         /// <param name="downhillEfficiency">
         /// Specifies the efficiency of converting potential energy to saved (not consumed) fuel when the vehicle loses elevation _(i.e. ChemicalEnergySaved/PotentialEnergyLost). ChemicalEnergySaved_ is obtained by converting saved (not consumed) fuel to energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -936,7 +931,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**uphillEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.51, for **Electric Model** : 0.73.
+        /// Sensible Values : for **Combustion Model** : 0.51, for **Electric Model** : 0.73
         /// </param>
         /// <param name="constantSpeedConsumptionInkWhPerHundredkm">
         /// Specifies the speed-dependent component of consumption.
@@ -966,7 +961,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to **maxChargeInkWh**.
         /// 
-        /// Sensible Values : 43.
+        /// Sensible Values : 43
         /// </param>
         /// <param name="maxChargeInkWh">
         /// Specifies the maximum electric energy supply in kilowatt hours (kWh) that may be stored in the vehicle&apos;s battery.
@@ -975,14 +970,14 @@ namespace Azure.Maps.Route
         /// 
         /// Minimum value has to be greater than or equal to **currentChargeInkWh**.
         /// 
-        /// Sensible Values : 85.
+        /// Sensible Values : 85
         /// </param>
         /// <param name="auxiliaryPowerInkW">
         /// Specifies the amount of power consumed for sustaining auxiliary systems, in kilowatts (kW).
         /// 
         /// It can be used to specify consumption due to devices and systems such as AC systems, radio, heating, etc.
         /// 
-        /// Sensible Values : 1.7.
+        /// Sensible Values : 1.7
         /// </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         public virtual async Task<Response<RouteDirectionsResponse>> PostRouteDirectionsAsync(TextFormat format, string query, PostRouteDirectionsRequestBody postRouteDirectionsRequestBody, int? maxAlternatives = null, AlternativeRouteType? alternativeType = null, int? minDeviationDistance = null, int? minDeviationTime = null, RouteInstructionsType? instructionsType = null, string language = null, bool? computeBestOrder = null, RouteRepresentation? routeRepresentation = null, ComputeTravelTimeFor? computeTravelTimeFor = null, int? vehicleHeading = null, string report = null, SectionType? sectionType = null, DateTimeOffset? arriveAt = null, DateTimeOffset? departAt = null, int? vehicleAxleWeight = null, float? vehicleLength = null, float? vehicleHeight = null, float? vehicleWidth = null, int? vehicleMaxSpeed = null, int? vehicleWeight = null, bool? vehicleCommercial = null, WindingnessLevel? windingness = null, HillinessDegree? hilliness = null, TravelMode? travelMode = null, IEnumerable<RouteAvoidType> avoid = null, bool? traffic = null, RouteType? routeType = null, VehicleLoadType? vehicleLoadType = null, VehicleEngineType? vehicleEngineType = null, float? constantSpeedConsumptionInLitersPerHundredkm = null, float? currentFuelInLiters = null, float? auxiliaryPowerInLitersPerHour = null, float? fuelEnergyDensityInMJoulesPerLiter = null, float? accelerationEfficiency = null, float? decelerationEfficiency = null, float? uphillEfficiency = null, float? downhillEfficiency = null, string constantSpeedConsumptionInkWhPerHundredkm = null, string currentChargeInkWh = null, string maxChargeInkWh = null, string auxiliaryPowerInkW = null, CancellationToken cancellationToken = default)
@@ -1059,7 +1054,7 @@ namespace Azure.Maps.Route
         /// <param name="vehicleHeight"> Height of the vehicle in meters. A value of 0 means that height restrictions are not considered. </param>
         /// <param name="vehicleWidth"> Width of the vehicle in meters. A value of 0 means that width restrictions are not considered. </param>
         /// <param name="vehicleMaxSpeed">
-        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways.
+        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways. 
         /// 
         /// * A value of 0 means that an appropriate value for the vehicle will be determined and applied during route planning.
         /// 
@@ -1076,7 +1071,7 @@ namespace Azure.Maps.Route
         /// 
         /// * In all other cases, this parameter is ignored.
         /// 
-        /// Sensible Values : for **Combustion Model** : 1600, for **Electric Model** : 1900.
+        /// Sensible Values : for **Combustion Model** : 1600, for **Electric Model** : 1900
         /// </param>
         /// <param name="vehicleCommercial"> Vehicle is used for commercial purposes and thus may not be allowed to drive  on some roads. </param>
         /// <param name="windingness"> Level of turns for thrilling route. This parameter can only be used in conjunction with `routeType`=thrilling. </param>
@@ -1084,16 +1079,15 @@ namespace Azure.Maps.Route
         /// <param name="travelMode"> The mode of travel for the requested route. If not defined, default is &apos;car&apos;. Note that the requested travelMode may not be available for the entire route. Where the requested travelMode is not available for a particular section, the travelMode element of the response for that section will be &quot;other&quot;. Note that travel modes bus, motorcycle, taxi and van are BETA functionality. Full restriction data is not available in all areas. In **calculateReachableRange** requests, the values bicycle and pedestrian must not be used. </param>
         /// <param name="avoid"> Specifies something that the route calculation should try to avoid when determining the route. Can be specified multiple times in one request, for example, &apos;&amp;avoid=motorways&amp;avoid=tollRoads&amp;avoid=ferries&apos;. In calculateReachableRange requests, the value alreadyUsedRoads must not be used. </param>
         /// <param name="traffic">
-        /// Possible values:
+        /// Possible values: 
         ///   * true - Do consider all available traffic information during routing
-        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored
+        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored 
         ///   during routing, the effect of historic traffic on effective road speeds is still incorporated.
         /// </param>
         /// <param name="routeType"> The type of route requested. </param>
         /// <param name="vehicleLoadType"> Types of cargo that may be classified as hazardous materials and restricted from some roads. Available vehicleLoadType values are US Hazmat classes 1 through 9, plus generic classifications for use in other countries. Values beginning with USHazmat are for US routing while otherHazmat should be used for all other countries. vehicleLoadType can be specified multiple times. This parameter is currently only considered for travelMode=truck. </param>
         /// <param name="vehicleEngineType"> Engine type of the vehicle. When a detailed Consumption Model is specified, it must be consistent with the value of **vehicleEngineType**. </param>
         /// <param name="constantSpeedConsumptionInLitersPerHundredkm">
-        /// 
         /// 
         /// Specifies the speed-dependent component of consumption.
         /// 
@@ -1118,21 +1112,21 @@ namespace Azure.Maps.Route
         /// <param name="currentFuelInLiters">
         /// Specifies the current supply of fuel in liters.
         /// 
-        /// Sensible Values : 55.
+        /// Sensible Values : 55
         /// </param>
         /// <param name="auxiliaryPowerInLitersPerHour">
         /// Specifies the amount of fuel consumed for sustaining auxiliary systems of the vehicle, in liters per hour.
         /// 
         /// It can be used to specify consumption due to devices and systems such as AC systems, radio, heating, etc.
         /// 
-        /// Sensible Values : 0.2.
+        /// Sensible Values : 0.2
         /// </param>
         /// <param name="fuelEnergyDensityInMJoulesPerLiter">
         /// Specifies the amount of chemical energy stored in one liter of fuel in megajoules (MJ). It is used in conjunction with the ***Efficiency** parameters for conversions between saved or consumed energy and fuel. For example, energy density is 34.2 MJ/l for gasoline, and 35.8 MJ/l for Diesel fuel.
         /// 
         /// This parameter is required if any ***Efficiency** parameter is set.
         /// 
-        /// Sensible Values : 34.2.
+        /// Sensible Values : 34.2
         /// </param>
         /// <param name="accelerationEfficiency">
         /// Specifies the efficiency of converting chemical energy stored in fuel to kinetic energy when the vehicle accelerates _(i.e. KineticEnergyGained/ChemicalEnergyConsumed). ChemicalEnergyConsumed_ is obtained by converting consumed fuel to chemical energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -1141,7 +1135,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**decelerationEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.33, for **Electric Model** : 0.66.
+        /// Sensible Values : for **Combustion Model** : 0.33, for **Electric Model** : 0.66
         /// </param>
         /// <param name="decelerationEfficiency">
         /// Specifies the efficiency of converting kinetic energy to saved (not consumed) fuel when the vehicle decelerates _(i.e. ChemicalEnergySaved/KineticEnergyLost). ChemicalEnergySaved_ is obtained by converting saved (not consumed) fuel to energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -1150,7 +1144,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**accelerationEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.83, for **Electric Model** : 0.91.
+        /// Sensible Values : for **Combustion Model** : 0.83, for **Electric Model** : 0.91
         /// </param>
         /// <param name="uphillEfficiency">
         /// Specifies the efficiency of converting chemical energy stored in fuel to potential energy when the vehicle gains elevation _(i.e. PotentialEnergyGained/ChemicalEnergyConsumed). ChemicalEnergyConsumed_ is obtained by converting consumed fuel to chemical energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -1159,7 +1153,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**downhillEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.27, for **Electric Model** : 0.74.
+        /// Sensible Values : for **Combustion Model** : 0.27, for **Electric Model** : 0.74
         /// </param>
         /// <param name="downhillEfficiency">
         /// Specifies the efficiency of converting potential energy to saved (not consumed) fuel when the vehicle loses elevation _(i.e. ChemicalEnergySaved/PotentialEnergyLost). ChemicalEnergySaved_ is obtained by converting saved (not consumed) fuel to energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -1168,7 +1162,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**uphillEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.51, for **Electric Model** : 0.73.
+        /// Sensible Values : for **Combustion Model** : 0.51, for **Electric Model** : 0.73
         /// </param>
         /// <param name="constantSpeedConsumptionInkWhPerHundredkm">
         /// Specifies the speed-dependent component of consumption.
@@ -1198,7 +1192,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to **maxChargeInkWh**.
         /// 
-        /// Sensible Values : 43.
+        /// Sensible Values : 43
         /// </param>
         /// <param name="maxChargeInkWh">
         /// Specifies the maximum electric energy supply in kilowatt hours (kWh) that may be stored in the vehicle&apos;s battery.
@@ -1207,14 +1201,14 @@ namespace Azure.Maps.Route
         /// 
         /// Minimum value has to be greater than or equal to **currentChargeInkWh**.
         /// 
-        /// Sensible Values : 85.
+        /// Sensible Values : 85
         /// </param>
         /// <param name="auxiliaryPowerInkW">
         /// Specifies the amount of power consumed for sustaining auxiliary systems, in kilowatts (kW).
         /// 
         /// It can be used to specify consumption due to devices and systems such as AC systems, radio, heating, etc.
         /// 
-        /// Sensible Values : 1.7.
+        /// Sensible Values : 1.7
         /// </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         public virtual Response<RouteDirectionsResponse> PostRouteDirections(TextFormat format, string query, PostRouteDirectionsRequestBody postRouteDirectionsRequestBody, int? maxAlternatives = null, AlternativeRouteType? alternativeType = null, int? minDeviationDistance = null, int? minDeviationTime = null, RouteInstructionsType? instructionsType = null, string language = null, bool? computeBestOrder = null, RouteRepresentation? routeRepresentation = null, ComputeTravelTimeFor? computeTravelTimeFor = null, int? vehicleHeading = null, string report = null, SectionType? sectionType = null, DateTimeOffset? arriveAt = null, DateTimeOffset? departAt = null, int? vehicleAxleWeight = null, float? vehicleLength = null, float? vehicleHeight = null, float? vehicleWidth = null, int? vehicleMaxSpeed = null, int? vehicleWeight = null, bool? vehicleCommercial = null, WindingnessLevel? windingness = null, HillinessDegree? hilliness = null, TravelMode? travelMode = null, IEnumerable<RouteAvoidType> avoid = null, bool? traffic = null, RouteType? routeType = null, VehicleLoadType? vehicleLoadType = null, VehicleEngineType? vehicleEngineType = null, float? constantSpeedConsumptionInLitersPerHundredkm = null, float? currentFuelInLiters = null, float? auxiliaryPowerInLitersPerHour = null, float? fuelEnergyDensityInMJoulesPerLiter = null, float? accelerationEfficiency = null, float? decelerationEfficiency = null, float? uphillEfficiency = null, float? downhillEfficiency = null, string constantSpeedConsumptionInkWhPerHundredkm = null, string currentChargeInkWh = null, string maxChargeInkWh = null, string auxiliaryPowerInkW = null, CancellationToken cancellationToken = default)
@@ -1251,9 +1245,9 @@ namespace Azure.Maps.Route
         /// <param name="departAt"> The date and time of departure from the origin point. Departure times apart from now must be specified as a dateTime. When a time zone offset is not specified, it will be assumed to be that of the origin point. The departAt value must be in the future in the date-time format (1996-12-19T16:39:57-08:00). </param>
         /// <param name="routeType"> The type of route requested. </param>
         /// <param name="traffic">
-        /// Possible values:
+        /// Possible values: 
         ///   * true - Do consider all available traffic information during routing
-        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored
+        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored 
         ///   during routing, the effect of historic traffic on effective road speeds is still incorporated.
         /// </param>
         /// <param name="avoid"> Specifies something that the route calculation should try to avoid when determining the route. Can be specified multiple times in one request, for example, &apos;&amp;avoid=motorways&amp;avoid=tollRoads&amp;avoid=ferries&apos;. In calculateReachableRange requests, the value alreadyUsedRoads must not be used. </param>
@@ -1265,7 +1259,7 @@ namespace Azure.Maps.Route
         /// <param name="vehicleHeight"> Height of the vehicle in meters. A value of 0 means that height restrictions are not considered. </param>
         /// <param name="vehicleLength"> Length of the vehicle in meters. A value of 0 means that length restrictions are not considered. </param>
         /// <param name="vehicleMaxSpeed">
-        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways.
+        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways. 
         /// 
         /// * A value of 0 means that an appropriate value for the vehicle will be determined and applied during route planning.
         /// 
@@ -1282,13 +1276,12 @@ namespace Azure.Maps.Route
         /// 
         /// * In all other cases, this parameter is ignored.
         /// 
-        /// Sensible Values : for **Combustion Model** : 1600, for **Electric Model** : 1900.
+        /// Sensible Values : for **Combustion Model** : 1600, for **Electric Model** : 1900
         /// </param>
         /// <param name="vehicleCommercial"> Vehicle is used for commercial purposes and thus may not be allowed to drive  on some roads. </param>
         /// <param name="vehicleLoadType"> Types of cargo that may be classified as hazardous materials and restricted from some roads. Available vehicleLoadType values are US Hazmat classes 1 through 9, plus generic classifications for use in other countries. Values beginning with USHazmat are for US routing while otherHazmat should be used for all other countries. vehicleLoadType can be specified multiple times. This parameter is currently only considered for travelMode=truck. </param>
         /// <param name="vehicleEngineType"> Engine type of the vehicle. When a detailed Consumption Model is specified, it must be consistent with the value of **vehicleEngineType**. </param>
         /// <param name="constantSpeedConsumptionInLitersPerHundredkm">
-        /// 
         /// 
         /// Specifies the speed-dependent component of consumption.
         /// 
@@ -1313,21 +1306,21 @@ namespace Azure.Maps.Route
         /// <param name="currentFuelInLiters">
         /// Specifies the current supply of fuel in liters.
         /// 
-        /// Sensible Values : 55.
+        /// Sensible Values : 55
         /// </param>
         /// <param name="auxiliaryPowerInLitersPerHour">
         /// Specifies the amount of fuel consumed for sustaining auxiliary systems of the vehicle, in liters per hour.
         /// 
         /// It can be used to specify consumption due to devices and systems such as AC systems, radio, heating, etc.
         /// 
-        /// Sensible Values : 0.2.
+        /// Sensible Values : 0.2
         /// </param>
         /// <param name="fuelEnergyDensityInMJoulesPerLiter">
         /// Specifies the amount of chemical energy stored in one liter of fuel in megajoules (MJ). It is used in conjunction with the ***Efficiency** parameters for conversions between saved or consumed energy and fuel. For example, energy density is 34.2 MJ/l for gasoline, and 35.8 MJ/l for Diesel fuel.
         /// 
         /// This parameter is required if any ***Efficiency** parameter is set.
         /// 
-        /// Sensible Values : 34.2.
+        /// Sensible Values : 34.2
         /// </param>
         /// <param name="accelerationEfficiency">
         /// Specifies the efficiency of converting chemical energy stored in fuel to kinetic energy when the vehicle accelerates _(i.e. KineticEnergyGained/ChemicalEnergyConsumed). ChemicalEnergyConsumed_ is obtained by converting consumed fuel to chemical energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -1336,7 +1329,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**decelerationEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.33, for **Electric Model** : 0.66.
+        /// Sensible Values : for **Combustion Model** : 0.33, for **Electric Model** : 0.66
         /// </param>
         /// <param name="decelerationEfficiency">
         /// Specifies the efficiency of converting kinetic energy to saved (not consumed) fuel when the vehicle decelerates _(i.e. ChemicalEnergySaved/KineticEnergyLost). ChemicalEnergySaved_ is obtained by converting saved (not consumed) fuel to energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -1345,7 +1338,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**accelerationEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.83, for **Electric Model** : 0.91.
+        /// Sensible Values : for **Combustion Model** : 0.83, for **Electric Model** : 0.91
         /// </param>
         /// <param name="uphillEfficiency">
         /// Specifies the efficiency of converting chemical energy stored in fuel to potential energy when the vehicle gains elevation _(i.e. PotentialEnergyGained/ChemicalEnergyConsumed). ChemicalEnergyConsumed_ is obtained by converting consumed fuel to chemical energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -1354,7 +1347,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**downhillEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.27, for **Electric Model** : 0.74.
+        /// Sensible Values : for **Combustion Model** : 0.27, for **Electric Model** : 0.74
         /// </param>
         /// <param name="downhillEfficiency">
         /// Specifies the efficiency of converting potential energy to saved (not consumed) fuel when the vehicle loses elevation _(i.e. ChemicalEnergySaved/PotentialEnergyLost). ChemicalEnergySaved_ is obtained by converting saved (not consumed) fuel to energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -1363,7 +1356,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**uphillEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.51, for **Electric Model** : 0.73.
+        /// Sensible Values : for **Combustion Model** : 0.51, for **Electric Model** : 0.73
         /// </param>
         /// <param name="constantSpeedConsumptionInkWhPerHundredkm">
         /// Specifies the speed-dependent component of consumption.
@@ -1393,7 +1386,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to **maxChargeInkWh**.
         /// 
-        /// Sensible Values : 43.
+        /// Sensible Values : 43
         /// </param>
         /// <param name="maxChargeInkWh">
         /// Specifies the maximum electric energy supply in kilowatt hours (kWh) that may be stored in the vehicle&apos;s battery.
@@ -1402,14 +1395,14 @@ namespace Azure.Maps.Route
         /// 
         /// Minimum value has to be greater than or equal to **currentChargeInkWh**.
         /// 
-        /// Sensible Values : 85.
+        /// Sensible Values : 85
         /// </param>
         /// <param name="auxiliaryPowerInkW">
         /// Specifies the amount of power consumed for sustaining auxiliary systems, in kilowatts (kW).
         /// 
         /// It can be used to specify consumption due to devices and systems such as AC systems, radio, heating, etc.
         /// 
-        /// Sensible Values : 1.7.
+        /// Sensible Values : 1.7
         /// </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         public virtual async Task<Response<GetRouteRangeResponse>> GetRouteRangeAsync(TextFormat format, string query, float? fuelBudgetInLiters = null, float? energyBudgetInkWh = null, float? timeBudgetInSec = null, float? distanceBudgetInMeters = null, DateTimeOffset? departAt = null, RouteType? routeType = null, bool? traffic = null, IEnumerable<RouteAvoidType> avoid = null, TravelMode? travelMode = null, HillinessDegree? hilliness = null, WindingnessLevel? windingness = null, int? vehicleAxleWeight = null, float? vehicleWidth = null, float? vehicleHeight = null, float? vehicleLength = null, int? vehicleMaxSpeed = null, int? vehicleWeight = null, bool? vehicleCommercial = null, VehicleLoadType? vehicleLoadType = null, VehicleEngineType? vehicleEngineType = null, float? constantSpeedConsumptionInLitersPerHundredkm = null, float? currentFuelInLiters = null, float? auxiliaryPowerInLitersPerHour = null, float? fuelEnergyDensityInMJoulesPerLiter = null, float? accelerationEfficiency = null, float? decelerationEfficiency = null, float? uphillEfficiency = null, float? downhillEfficiency = null, string constantSpeedConsumptionInkWhPerHundredkm = null, string currentChargeInkWh = null, string maxChargeInkWh = null, string auxiliaryPowerInkW = null, CancellationToken cancellationToken = default)
@@ -1446,9 +1439,9 @@ namespace Azure.Maps.Route
         /// <param name="departAt"> The date and time of departure from the origin point. Departure times apart from now must be specified as a dateTime. When a time zone offset is not specified, it will be assumed to be that of the origin point. The departAt value must be in the future in the date-time format (1996-12-19T16:39:57-08:00). </param>
         /// <param name="routeType"> The type of route requested. </param>
         /// <param name="traffic">
-        /// Possible values:
+        /// Possible values: 
         ///   * true - Do consider all available traffic information during routing
-        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored
+        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored 
         ///   during routing, the effect of historic traffic on effective road speeds is still incorporated.
         /// </param>
         /// <param name="avoid"> Specifies something that the route calculation should try to avoid when determining the route. Can be specified multiple times in one request, for example, &apos;&amp;avoid=motorways&amp;avoid=tollRoads&amp;avoid=ferries&apos;. In calculateReachableRange requests, the value alreadyUsedRoads must not be used. </param>
@@ -1460,7 +1453,7 @@ namespace Azure.Maps.Route
         /// <param name="vehicleHeight"> Height of the vehicle in meters. A value of 0 means that height restrictions are not considered. </param>
         /// <param name="vehicleLength"> Length of the vehicle in meters. A value of 0 means that length restrictions are not considered. </param>
         /// <param name="vehicleMaxSpeed">
-        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways.
+        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways. 
         /// 
         /// * A value of 0 means that an appropriate value for the vehicle will be determined and applied during route planning.
         /// 
@@ -1477,13 +1470,12 @@ namespace Azure.Maps.Route
         /// 
         /// * In all other cases, this parameter is ignored.
         /// 
-        /// Sensible Values : for **Combustion Model** : 1600, for **Electric Model** : 1900.
+        /// Sensible Values : for **Combustion Model** : 1600, for **Electric Model** : 1900
         /// </param>
         /// <param name="vehicleCommercial"> Vehicle is used for commercial purposes and thus may not be allowed to drive  on some roads. </param>
         /// <param name="vehicleLoadType"> Types of cargo that may be classified as hazardous materials and restricted from some roads. Available vehicleLoadType values are US Hazmat classes 1 through 9, plus generic classifications for use in other countries. Values beginning with USHazmat are for US routing while otherHazmat should be used for all other countries. vehicleLoadType can be specified multiple times. This parameter is currently only considered for travelMode=truck. </param>
         /// <param name="vehicleEngineType"> Engine type of the vehicle. When a detailed Consumption Model is specified, it must be consistent with the value of **vehicleEngineType**. </param>
         /// <param name="constantSpeedConsumptionInLitersPerHundredkm">
-        /// 
         /// 
         /// Specifies the speed-dependent component of consumption.
         /// 
@@ -1508,21 +1500,21 @@ namespace Azure.Maps.Route
         /// <param name="currentFuelInLiters">
         /// Specifies the current supply of fuel in liters.
         /// 
-        /// Sensible Values : 55.
+        /// Sensible Values : 55
         /// </param>
         /// <param name="auxiliaryPowerInLitersPerHour">
         /// Specifies the amount of fuel consumed for sustaining auxiliary systems of the vehicle, in liters per hour.
         /// 
         /// It can be used to specify consumption due to devices and systems such as AC systems, radio, heating, etc.
         /// 
-        /// Sensible Values : 0.2.
+        /// Sensible Values : 0.2
         /// </param>
         /// <param name="fuelEnergyDensityInMJoulesPerLiter">
         /// Specifies the amount of chemical energy stored in one liter of fuel in megajoules (MJ). It is used in conjunction with the ***Efficiency** parameters for conversions between saved or consumed energy and fuel. For example, energy density is 34.2 MJ/l for gasoline, and 35.8 MJ/l for Diesel fuel.
         /// 
         /// This parameter is required if any ***Efficiency** parameter is set.
         /// 
-        /// Sensible Values : 34.2.
+        /// Sensible Values : 34.2
         /// </param>
         /// <param name="accelerationEfficiency">
         /// Specifies the efficiency of converting chemical energy stored in fuel to kinetic energy when the vehicle accelerates _(i.e. KineticEnergyGained/ChemicalEnergyConsumed). ChemicalEnergyConsumed_ is obtained by converting consumed fuel to chemical energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -1531,7 +1523,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**decelerationEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.33, for **Electric Model** : 0.66.
+        /// Sensible Values : for **Combustion Model** : 0.33, for **Electric Model** : 0.66
         /// </param>
         /// <param name="decelerationEfficiency">
         /// Specifies the efficiency of converting kinetic energy to saved (not consumed) fuel when the vehicle decelerates _(i.e. ChemicalEnergySaved/KineticEnergyLost). ChemicalEnergySaved_ is obtained by converting saved (not consumed) fuel to energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -1540,7 +1532,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**accelerationEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.83, for **Electric Model** : 0.91.
+        /// Sensible Values : for **Combustion Model** : 0.83, for **Electric Model** : 0.91
         /// </param>
         /// <param name="uphillEfficiency">
         /// Specifies the efficiency of converting chemical energy stored in fuel to potential energy when the vehicle gains elevation _(i.e. PotentialEnergyGained/ChemicalEnergyConsumed). ChemicalEnergyConsumed_ is obtained by converting consumed fuel to chemical energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -1549,7 +1541,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**downhillEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.27, for **Electric Model** : 0.74.
+        /// Sensible Values : for **Combustion Model** : 0.27, for **Electric Model** : 0.74
         /// </param>
         /// <param name="downhillEfficiency">
         /// Specifies the efficiency of converting potential energy to saved (not consumed) fuel when the vehicle loses elevation _(i.e. ChemicalEnergySaved/PotentialEnergyLost). ChemicalEnergySaved_ is obtained by converting saved (not consumed) fuel to energy using **fuelEnergyDensityInMJoulesPerLiter**.
@@ -1558,7 +1550,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to 1/**uphillEfficiency**.
         /// 
-        /// Sensible Values : for **Combustion Model** : 0.51, for **Electric Model** : 0.73.
+        /// Sensible Values : for **Combustion Model** : 0.51, for **Electric Model** : 0.73
         /// </param>
         /// <param name="constantSpeedConsumptionInkWhPerHundredkm">
         /// Specifies the speed-dependent component of consumption.
@@ -1588,7 +1580,7 @@ namespace Azure.Maps.Route
         /// 
         /// The range of values allowed are 0.0 to **maxChargeInkWh**.
         /// 
-        /// Sensible Values : 43.
+        /// Sensible Values : 43
         /// </param>
         /// <param name="maxChargeInkWh">
         /// Specifies the maximum electric energy supply in kilowatt hours (kWh) that may be stored in the vehicle&apos;s battery.
@@ -1597,14 +1589,14 @@ namespace Azure.Maps.Route
         /// 
         /// Minimum value has to be greater than or equal to **currentChargeInkWh**.
         /// 
-        /// Sensible Values : 85.
+        /// Sensible Values : 85
         /// </param>
         /// <param name="auxiliaryPowerInkW">
         /// Specifies the amount of power consumed for sustaining auxiliary systems, in kilowatts (kW).
         /// 
         /// It can be used to specify consumption due to devices and systems such as AC systems, radio, heating, etc.
         /// 
-        /// Sensible Values : 1.7.
+        /// Sensible Values : 1.7
         /// </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         public virtual Response<GetRouteRangeResponse> GetRouteRange(TextFormat format, string query, float? fuelBudgetInLiters = null, float? energyBudgetInkWh = null, float? timeBudgetInSec = null, float? distanceBudgetInMeters = null, DateTimeOffset? departAt = null, RouteType? routeType = null, bool? traffic = null, IEnumerable<RouteAvoidType> avoid = null, TravelMode? travelMode = null, HillinessDegree? hilliness = null, WindingnessLevel? windingness = null, int? vehicleAxleWeight = null, float? vehicleWidth = null, float? vehicleHeight = null, float? vehicleLength = null, int? vehicleMaxSpeed = null, int? vehicleWeight = null, bool? vehicleCommercial = null, VehicleLoadType? vehicleLoadType = null, VehicleEngineType? vehicleEngineType = null, float? constantSpeedConsumptionInLitersPerHundredkm = null, float? currentFuelInLiters = null, float? auxiliaryPowerInLitersPerHour = null, float? fuelEnergyDensityInMJoulesPerLiter = null, float? accelerationEfficiency = null, float? decelerationEfficiency = null, float? uphillEfficiency = null, float? downhillEfficiency = null, string constantSpeedConsumptionInkWhPerHundredkm = null, string currentChargeInkWh = null, string maxChargeInkWh = null, string auxiliaryPowerInkW = null, CancellationToken cancellationToken = default)
@@ -1689,7 +1681,7 @@ namespace Azure.Maps.Route
         /// Here&apos;s the typical sequence of operations for downloading the batch results:
         /// 1. Client sends a `GET` request using the _download URL_.
         /// 2. The server will respond with one of the following:
-        /// 
+        ///     
         ///     &gt; HTTP `202 Accepted` - Batch request was accepted but is still being processed. Please try again in some time.
         /// 
         ///     &gt; HTTP `200 OK` - Batch request successfully processed. The response body contains all the batch results.
@@ -1776,7 +1768,7 @@ namespace Azure.Maps.Route
         ///         }
         ///     ]
         /// }
-        /// ```.
+        /// ```
         /// </summary>
         /// <param name="format"> Desired format of the response. Only `json` format is supported. </param>
         /// <param name="postRouteDirectionsBatchRequestBody"> The list of route directions queries/requests to process. The list can contain  a max of 700 queries for async and 100 queries for sync version and must contain at least 1 query. </param>
@@ -1863,7 +1855,7 @@ namespace Azure.Maps.Route
         /// Here&apos;s the typical sequence of operations for downloading the batch results:
         /// 1. Client sends a `GET` request using the _download URL_.
         /// 2. The server will respond with one of the following:
-        /// 
+        ///     
         ///     &gt; HTTP `202 Accepted` - Batch request was accepted but is still being processed. Please try again in some time.
         /// 
         ///     &gt; HTTP `200 OK` - Batch request successfully processed. The response body contains all the batch results.
@@ -1950,7 +1942,7 @@ namespace Azure.Maps.Route
         ///         }
         ///     ]
         /// }
-        /// ```.
+        /// ```
         /// </summary>
         /// <param name="format"> Desired format of the response. Only `json` format is supported. </param>
         /// <param name="postRouteDirectionsBatchRequestBody"> The list of route directions queries/requests to process. The list can contain  a max of 700 queries for async and 100 queries for sync version and must contain at least 1 query. </param>
@@ -1971,7 +1963,6 @@ namespace Azure.Maps.Route
         }
 
         /// <summary>
-        /// 
         /// 
         /// **Applies to**: S1 pricing tier.
         /// 
@@ -2054,7 +2045,7 @@ namespace Azure.Maps.Route
         /// <param name="vehicleHeight"> Height of the vehicle in meters. A value of 0 means that height restrictions are not considered. </param>
         /// <param name="vehicleWidth"> Width of the vehicle in meters. A value of 0 means that width restrictions are not considered. </param>
         /// <param name="vehicleMaxSpeed">
-        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways.
+        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways. 
         /// 
         /// * A value of 0 means that an appropriate value for the vehicle will be determined and applied during route planning.
         /// 
@@ -2066,9 +2057,9 @@ namespace Azure.Maps.Route
         /// <param name="travelMode"> The mode of travel for the requested route. If not defined, default is &apos;car&apos;. Note that the requested travelMode may not be available for the entire route. Where the requested travelMode is not available for a particular section, the travelMode element of the response for that section will be &quot;other&quot;. Note that travel modes bus, motorcycle, taxi and van are BETA functionality. Full restriction data is not available in all areas. In **calculateReachableRange** requests, the values bicycle and pedestrian must not be used. </param>
         /// <param name="avoid"> Specifies something that the route calculation should try to avoid when determining the route. Can be specified multiple times in one request, for example, &apos;&amp;avoid=motorways&amp;avoid=tollRoads&amp;avoid=ferries&apos;. In calculateReachableRange requests, the value alreadyUsedRoads must not be used. </param>
         /// <param name="traffic">
-        /// Possible values:
+        /// Possible values: 
         ///   * true - Do consider all available traffic information during routing
-        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored
+        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored 
         ///   during routing, the effect of historic traffic on effective road speeds is still incorporated.
         /// </param>
         /// <param name="routeType"> The type of route requested. </param>
@@ -2098,7 +2089,6 @@ namespace Azure.Maps.Route
 
         /// <summary>
         /// 
-        /// 
         /// **Applies to**: S1 pricing tier.
         /// 
         /// The Matrix Routing service allows calculation of a matrix of route summaries for a set of routes defined by origin and destination locations by using an asynchronous (async) or synchronous (sync) POST request. For every given origin, the service calculates the cost of routing from that origin to every given destination. The set of origins and the set of destinations can be thought of as the column and row headers of a table and each cell in the table contains the costs of routing from the origin to the destination for that cell. As an example, let&apos;s say a food delivery company has 20 drivers and they need to find the closest driver to pick up the delivery from the restaurant. To solve this use case, they can call Matrix Route API.
@@ -2180,7 +2170,7 @@ namespace Azure.Maps.Route
         /// <param name="vehicleHeight"> Height of the vehicle in meters. A value of 0 means that height restrictions are not considered. </param>
         /// <param name="vehicleWidth"> Width of the vehicle in meters. A value of 0 means that width restrictions are not considered. </param>
         /// <param name="vehicleMaxSpeed">
-        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways.
+        /// Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways. 
         /// 
         /// * A value of 0 means that an appropriate value for the vehicle will be determined and applied during route planning.
         /// 
@@ -2192,9 +2182,9 @@ namespace Azure.Maps.Route
         /// <param name="travelMode"> The mode of travel for the requested route. If not defined, default is &apos;car&apos;. Note that the requested travelMode may not be available for the entire route. Where the requested travelMode is not available for a particular section, the travelMode element of the response for that section will be &quot;other&quot;. Note that travel modes bus, motorcycle, taxi and van are BETA functionality. Full restriction data is not available in all areas. In **calculateReachableRange** requests, the values bicycle and pedestrian must not be used. </param>
         /// <param name="avoid"> Specifies something that the route calculation should try to avoid when determining the route. Can be specified multiple times in one request, for example, &apos;&amp;avoid=motorways&amp;avoid=tollRoads&amp;avoid=ferries&apos;. In calculateReachableRange requests, the value alreadyUsedRoads must not be used. </param>
         /// <param name="traffic">
-        /// Possible values:
+        /// Possible values: 
         ///   * true - Do consider all available traffic information during routing
-        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored
+        ///   * false - Ignore current traffic data during routing. Note that although the current traffic data is ignored 
         ///   during routing, the effect of historic traffic on effective road speeds is still incorporated.
         /// </param>
         /// <param name="routeType"> The type of route requested. </param>
@@ -2387,7 +2377,7 @@ namespace Azure.Maps.Route
         /// Here&apos;s the typical sequence of operations for downloading the batch results:
         /// 1. Client sends a `GET` request using the _download URL_.
         /// 2. The server will respond with one of the following:
-        /// 
+        ///     
         ///     &gt; HTTP `202 Accepted` - Batch request was accepted but is still being processed. Please try again in some time.
         /// 
         ///     &gt; HTTP `200 OK` - Batch request successfully processed. The response body contains all the batch results.
@@ -2474,7 +2464,7 @@ namespace Azure.Maps.Route
         ///         }
         ///     ]
         /// }
-        /// ```.
+        /// ```
         /// </summary>
         /// <param name="format"> Desired format of the response. Only `json` format is supported. </param>
         /// <param name="postRouteDirectionsBatchRequestBody"> The list of route directions queries/requests to process. The list can contain  a max of 700 queries for async and 100 queries for sync version and must contain at least 1 query. </param>
@@ -2568,7 +2558,7 @@ namespace Azure.Maps.Route
         /// Here&apos;s the typical sequence of operations for downloading the batch results:
         /// 1. Client sends a `GET` request using the _download URL_.
         /// 2. The server will respond with one of the following:
-        /// 
+        ///     
         ///     &gt; HTTP `202 Accepted` - Batch request was accepted but is still being processed. Please try again in some time.
         /// 
         ///     &gt; HTTP `200 OK` - Batch request successfully processed. The response body contains all the batch results.
@@ -2655,7 +2645,7 @@ namespace Azure.Maps.Route
         ///         }
         ///     ]
         /// }
-        /// ```.
+        /// ```
         /// </summary>
         /// <param name="format"> Desired format of the response. Only `json` format is supported. </param>
         /// <param name="postRouteDirectionsBatchRequestBody"> The list of route directions queries/requests to process. The list can contain  a max of 700 queries for async and 100 queries for sync version and must contain at least 1 query. </param>
@@ -2692,7 +2682,7 @@ namespace Azure.Maps.Route
         /// Here&apos;s the typical sequence of operations for downloading the batch results:
         /// 1. Client sends a `GET` request using the _download URL_.
         /// 2. The server will respond with one of the following:
-        /// 
+        ///     
         ///     &gt; HTTP `202 Accepted` - Batch request was accepted but is still being processed. Please try again in some time.
         /// 
         ///     &gt; HTTP `200 OK` - Batch request successfully processed. The response body contains all the batch results.
@@ -2779,7 +2769,7 @@ namespace Azure.Maps.Route
         ///         }
         ///     ]
         /// }
-        /// ```.
+        /// ```
         /// </summary>
         /// <param name="format"> Batch id for querying the operation. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
@@ -2815,7 +2805,7 @@ namespace Azure.Maps.Route
         /// Here&apos;s the typical sequence of operations for downloading the batch results:
         /// 1. Client sends a `GET` request using the _download URL_.
         /// 2. The server will respond with one of the following:
-        /// 
+        ///     
         ///     &gt; HTTP `202 Accepted` - Batch request was accepted but is still being processed. Please try again in some time.
         /// 
         ///     &gt; HTTP `200 OK` - Batch request successfully processed. The response body contains all the batch results.
@@ -2902,7 +2892,7 @@ namespace Azure.Maps.Route
         ///         }
         ///     ]
         /// }
-        /// ```.
+        /// ```
         /// </summary>
         /// <param name="format"> Batch id for querying the operation. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>

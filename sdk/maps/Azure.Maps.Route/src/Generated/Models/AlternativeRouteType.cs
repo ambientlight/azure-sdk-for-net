@@ -15,7 +15,7 @@ namespace Azure.Maps.Route.Models
     {
         private readonly string _value;
 
-        /// <summary> Determines if two <see cref="AlternativeRouteType"/> values are the same. </summary>
+        /// <summary> Initializes a new instance of <see cref="AlternativeRouteType"/>. </summary>
         /// <exception cref="ArgumentNullException"> <paramref name="value"/> is null. </exception>
         public AlternativeRouteType(string value)
         {

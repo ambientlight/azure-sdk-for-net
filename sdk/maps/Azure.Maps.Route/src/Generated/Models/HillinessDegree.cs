@@ -15,7 +15,7 @@ namespace Azure.Maps.Route.Models
     {
         private readonly string _value;
 
-        /// <summary> Determines if two <see cref="HillinessDegree"/> values are the same. </summary>
+        /// <summary> Initializes a new instance of <see cref="HillinessDegree"/>. </summary>
         /// <exception cref="ArgumentNullException"> <paramref name="value"/> is null. </exception>
         public HillinessDegree(string value)
         {

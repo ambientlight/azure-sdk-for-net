@@ -15,7 +15,7 @@ namespace Azure.Maps.Route.Models
     {
         private readonly string _value;
 
-        /// <summary> Determines if two <see cref="TravelMode"/> values are the same. </summary>
+        /// <summary> Initializes a new instance of <see cref="TravelMode"/>. </summary>
         /// <exception cref="ArgumentNullException"> <paramref name="value"/> is null. </exception>
         public TravelMode(string value)
         {

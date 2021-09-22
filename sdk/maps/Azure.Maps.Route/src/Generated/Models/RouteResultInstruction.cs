@@ -43,7 +43,7 @@ namespace Azure.Maps.Route.Models
         /// If junctionType indicates a bifurcation instruction:
         /// 
         ///   * &lt;0 - keep left
-        ///   * \&gt;0 - keep right.
+        ///   * \&gt;0 - keep right
         /// </param>
         /// <param name="roundaboutExitNumber"> This indicates which exit to take at a roundabout. </param>
         /// <param name="possibleCombineWithNext"> It is possible to optionally combine the instruction with the next one. This can be used to build messages like &quot;Turn left and then turn right&quot;. </param>
@@ -63,7 +63,7 @@ namespace Azure.Maps.Route.Models
         /// ```
         /// Turn left onto Einsteinweg/A10/E22 towards Ring Amsterdam
         /// then follow Einsteinweg/A10/E22 towards Ring Amsterdam.
-        /// ```.
+        /// ```
         /// </param>
         internal RouteResultInstruction(int? routeOffsetInMeters, int? travelTimeInSeconds, CoordinatesPair point, int? pointIndex, GuidanceInstructionType? instructionType, IReadOnlyList<string> roadNumbers, string exitNumber, string street, string signpostText, string countryCode, string stateCode, JunctionType? junctionType, int? turnAngleInDecimalDegrees, string roundaboutExitNumber, bool? possibleCombineWithNext, DrivingSide? drivingSide, GuidanceManeuver? maneuver, string message, string combinedMessage)
         {
@@ -123,7 +123,7 @@ namespace Azure.Maps.Route.Models
         /// If junctionType indicates a bifurcation instruction:
         /// 
         ///   * &lt;0 - keep left
-        ///   * \&gt;0 - keep right.
+        ///   * \&gt;0 - keep right
         /// </summary>
         public int? TurnAngleInDecimalDegrees { get; }
         /// <summary> This indicates which exit to take at a roundabout. </summary>
@@ -149,7 +149,7 @@ namespace Azure.Maps.Route.Models
         /// ```
         /// Turn left onto Einsteinweg/A10/E22 towards Ring Amsterdam
         /// then follow Einsteinweg/A10/E22 towards Ring Amsterdam.
-        /// ```.
+        /// ```
         /// </summary>
         public string CombinedMessage { get; }
     }

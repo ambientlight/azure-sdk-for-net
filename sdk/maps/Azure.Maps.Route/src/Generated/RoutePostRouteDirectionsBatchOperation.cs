@@ -83,7 +83,7 @@ namespace Azure.Maps.Route
     /// Here&apos;s the typical sequence of operations for downloading the batch results:
     /// 1. Client sends a `GET` request using the _download URL_.
     /// 2. The server will respond with one of the following:
-    /// 
+    ///     
     ///     &gt; HTTP `202 Accepted` - Batch request was accepted but is still being processed. Please try again in some time.
     /// 
     ///     &gt; HTTP `200 OK` - Batch request successfully processed. The response body contains all the batch results.
@@ -170,7 +170,7 @@ namespace Azure.Maps.Route
     ///         }
     ///     ]
     /// }
-    /// ```.
+    /// ```
     /// </summary>
     public partial class RoutePostRouteDirectionsBatchOperation : Operation<RouteDirectionsBatchResponse>, IOperationSource<RouteDirectionsBatchResponse>
     {

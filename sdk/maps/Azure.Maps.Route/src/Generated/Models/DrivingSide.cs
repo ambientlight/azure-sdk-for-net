@@ -15,7 +15,7 @@ namespace Azure.Maps.Route.Models
     {
         private readonly string _value;
 
-        /// <summary> Determines if two <see cref="DrivingSide"/> values are the same. </summary>
+        /// <summary> Initializes a new instance of <see cref="DrivingSide"/>. </summary>
         /// <exception cref="ArgumentNullException"> <paramref name="value"/> is null. </exception>
         public DrivingSide(string value)
         {

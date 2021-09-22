@@ -21,7 +21,7 @@ namespace Azure.Maps.Route.Models
         /// <param name="formatVersion"> Format Version property. </param>
         /// <param name="routes"> Routes array. </param>
         /// <param name="optimizedWaypoints">
-        /// Optimized sequence of waypoints. It shows the index from the user provided waypoint sequence for the original and optimized list. For instance, a response:
+        /// Optimized sequence of waypoints. It shows the index from the user provided waypoint sequence for the original and optimized list. For instance, a response: 
         /// 
         /// ```
         /// &lt;optimizedWaypoints&gt;

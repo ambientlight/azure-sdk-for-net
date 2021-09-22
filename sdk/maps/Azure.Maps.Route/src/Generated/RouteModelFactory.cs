@@ -6,42 +6,43 @@
 #nullable disable
 
 using System.Collections.Generic;
-using Azure.Maps.Route.Models;
+using System.Linq;
 
-namespace Azure.Maps.Route
+namespace Azure.Maps.Route.Models
 {
     /// <summary> Model factory for read-only models. </summary>
     public static partial class RouteModelFactory
     {
-        /// <summary> Initializes new instance of RouteMatrixResponse class. </summary>
+        /// <summary> Initializes a new instance of RouteMatrixResponse. </summary>
         /// <param name="formatVersion"> Format Version property. </param>
         /// <param name="matrix"> Results as a 2 dimensional array of route summaries. </param>
         /// <param name="summary"> Summary object. </param>
         /// <returns> A new <see cref="Models.RouteMatrixResponse"/> instance for mocking. </returns>
-        public static RouteMatrixResponse RouteMatrixResponse(string formatVersion = default, IReadOnlyList<IList<RouteMatrixResult>> matrix = default, RouteMatrixSummary summary = default)
+        public static RouteMatrixResponse RouteMatrixResponse(string formatVersion = null, IEnumerable<IList<RouteMatrixResult>> matrix = null, RouteMatrixSummary summary = null)
         {
             matrix ??= new List<IList<RouteMatrixResult>>();
-            return new RouteMatrixResponse(formatVersion, matrix, summary);
+
+            return new RouteMatrixResponse(formatVersion, matrix?.ToList(), summary);
         }
 
-        /// <summary> Initializes new instance of RouteMatrixResult class. </summary>
+        /// <summary> Initializes a new instance of RouteMatrixResult. </summary>
         /// <param name="statusCode"> StatusCode property for the current cell in the input matrix. </param>
         /// <param name="response"> Response object of the current cell in the input matrix. </param>
         /// <returns> A new <see cref="Models.RouteMatrixResult"/> instance for mocking. </returns>
-        public static RouteMatrixResult RouteMatrixResult(int? statusCode = default, RouteMatrixResultResponse response = default)
+        public static RouteMatrixResult RouteMatrixResult(int? statusCode = null, RouteMatrixResultResponse response = null)
         {
             return new RouteMatrixResult(statusCode, response);
         }
 
-        /// <summary> Initializes new instance of RouteMatrixResultResponse class. </summary>
+        /// <summary> Initializes a new instance of RouteMatrixResultResponse. </summary>
         /// <param name="routeSummary"> Summary object for route section. </param>
         /// <returns> A new <see cref="Models.RouteMatrixResultResponse"/> instance for mocking. </returns>
-        public static RouteMatrixResultResponse RouteMatrixResultResponse(RouteResultLegSummary routeSummary = default)
+        public static RouteMatrixResultResponse RouteMatrixResultResponse(RouteResultLegSummary routeSummary = null)
         {
             return new RouteMatrixResultResponse(routeSummary);
         }
 
-        /// <summary> Initializes new instance of RouteResultLegSummary class. </summary>
+        /// <summary> Initializes a new instance of RouteResultLegSummary. </summary>
         /// <param name="lengthInMeters"> Length In Meters property. </param>
         /// <param name="travelTimeInSeconds"> Estimated travel time in seconds property that includes the delay due to real-time traffic. Note that even when traffic=false travelTimeInSeconds still includes the delay due to traffic. If DepartAt is in the future, travel time is calculated using time-dependent historic traffic data. </param>
         /// <param name="trafficDelayInSeconds"> Estimated delay in seconds caused by the real-time incident(s) according to traffic information. For routes planned with departure time in the future, delays is always 0. To return additional travel times using different types of traffic information, parameter computeTravelTimeFor=all needs to be added. </param>
@@ -53,56 +54,57 @@ namespace Azure.Maps.Route
         /// <param name="fuelConsumptionInLiters"> Estimated fuel consumption in liters using the Combustion Consumption Model. Included if vehicleEngineType is set to _combustion_ and constantSpeedConsumptionInLitersPerHundredkm is specified. The value will be non-negative. </param>
         /// <param name="batteryConsumptionInkWh"> Estimated electric energy consumption in kilowatt hours (kWh) using the Electric Consumption Model. Included if vehicleEngineType is set to electric and constantSpeedConsumptionInkWhPerHundredkm is specified. The value of batteryConsumptionInkWh includes the recuperated electric energy and can therefore be negative (which indicates gaining energy). If both maxChargeInkWh and currentChargeInkWh are specified, recuperation will be capped to ensure that the battery charge level never exceeds maxChargeInkWh. If neither maxChargeInkWh nor currentChargeInkWh are specified, unconstrained recuperation is assumed in the consumption calculation. </param>
         /// <returns> A new <see cref="Models.RouteResultLegSummary"/> instance for mocking. </returns>
-        public static RouteResultLegSummary RouteResultLegSummary(int? lengthInMeters = default, int? travelTimeInSeconds = default, int? trafficDelayInSeconds = default, string departureTime = default, string arrivalTime = default, int? noTrafficTravelTimeInSeconds = default, int? historicTrafficTravelTimeInSeconds = default, int? liveTrafficIncidentsTravelTimeInSeconds = default, float? fuelConsumptionInLiters = default, float? batteryConsumptionInkWh = default)
+        public static RouteResultLegSummary RouteResultLegSummary(int? lengthInMeters = null, int? travelTimeInSeconds = null, int? trafficDelayInSeconds = null, string departureTime = null, string arrivalTime = null, int? noTrafficTravelTimeInSeconds = null, int? historicTrafficTravelTimeInSeconds = null, int? liveTrafficIncidentsTravelTimeInSeconds = null, float? fuelConsumptionInLiters = null, float? batteryConsumptionInkWh = null)
         {
             return new RouteResultLegSummary(lengthInMeters, travelTimeInSeconds, trafficDelayInSeconds, departureTime, arrivalTime, noTrafficTravelTimeInSeconds, historicTrafficTravelTimeInSeconds, liveTrafficIncidentsTravelTimeInSeconds, fuelConsumptionInLiters, batteryConsumptionInkWh);
         }
 
-        /// <summary> Initializes new instance of RouteMatrixSummary class. </summary>
+        /// <summary> Initializes a new instance of RouteMatrixSummary. </summary>
         /// <param name="successfulRoutes"> Number of successful routes in the response. </param>
         /// <param name="totalRoutes"> Total number of routes requested. Number of cells in the input matrix. </param>
         /// <returns> A new <see cref="Models.RouteMatrixSummary"/> instance for mocking. </returns>
-        public static RouteMatrixSummary RouteMatrixSummary(int? successfulRoutes = default, int? totalRoutes = default)
+        public static RouteMatrixSummary RouteMatrixSummary(int? successfulRoutes = null, int? totalRoutes = null)
         {
             return new RouteMatrixSummary(successfulRoutes, totalRoutes);
         }
 
-        /// <summary> Initializes new instance of ErrorResponse class. </summary>
+        /// <summary> Initializes a new instance of ErrorResponse. </summary>
         /// <param name="error"> The error object. </param>
         /// <returns> A new <see cref="Models.ErrorResponse"/> instance for mocking. </returns>
-        public static ErrorResponse ErrorResponse(ErrorDetail error = default)
+        public static ErrorResponse ErrorResponse(ErrorDetail error = null)
         {
             return new ErrorResponse(error);
         }
 
-        /// <summary> Initializes new instance of ErrorDetail class. </summary>
+        /// <summary> Initializes a new instance of ErrorDetail. </summary>
         /// <param name="code"> The error code. </param>
         /// <param name="message"> The error message. </param>
         /// <param name="target"> The error target. </param>
         /// <param name="details"> The error details. </param>
         /// <param name="additionalInfo"> The error additional info. </param>
         /// <returns> A new <see cref="Models.ErrorDetail"/> instance for mocking. </returns>
-        public static ErrorDetail ErrorDetail(string code = default, string message = default, string target = default, IReadOnlyList<ErrorDetail> details = default, IReadOnlyList<ErrorAdditionalInfo> additionalInfo = default)
+        public static ErrorDetail ErrorDetail(string code = null, string message = null, string target = null, IEnumerable<ErrorDetail> details = null, IEnumerable<ErrorAdditionalInfo> additionalInfo = null)
         {
             details ??= new List<ErrorDetail>();
             additionalInfo ??= new List<ErrorAdditionalInfo>();
-            return new ErrorDetail(code, message, target, details, additionalInfo);
+
+            return new ErrorDetail(code, message, target, details?.ToList(), additionalInfo?.ToList());
         }
 
-        /// <summary> Initializes new instance of ErrorAdditionalInfo class. </summary>
+        /// <summary> Initializes a new instance of ErrorAdditionalInfo. </summary>
         /// <param name="type"> The additional info type. </param>
         /// <param name="info"> The additional info. </param>
         /// <returns> A new <see cref="Models.ErrorAdditionalInfo"/> instance for mocking. </returns>
-        public static ErrorAdditionalInfo ErrorAdditionalInfo(string type = default, object info = default)
+        public static ErrorAdditionalInfo ErrorAdditionalInfo(string type = null, object info = null)
         {
             return new ErrorAdditionalInfo(type, info);
         }
 
-        /// <summary> Initializes new instance of RouteDirectionsResponse class. </summary>
+        /// <summary> Initializes a new instance of RouteDirectionsResponse. </summary>
         /// <param name="formatVersion"> Format Version property. </param>
         /// <param name="routes"> Routes array. </param>
         /// <param name="optimizedWaypoints">
-        /// Optimized sequence of waypoints. It shows the index from the user provided waypoint sequence for the original and optimized list. For instance, a response:
+        /// Optimized sequence of waypoints. It shows the index from the user provided waypoint sequence for the original and optimized list. For instance, a response: 
         /// 
         /// ```
         /// &lt;optimizedWaypoints&gt;
@@ -116,58 +118,61 @@ namespace Azure.Maps.Route
         /// </param>
         /// <param name="report"> Reports the effective settings used in the current call. </param>
         /// <returns> A new <see cref="Models.RouteDirectionsResponse"/> instance for mocking. </returns>
-        public static RouteDirectionsResponse RouteDirectionsResponse(string formatVersion = default, IReadOnlyList<RouteDirectionsResult> routes = default, IReadOnlyList<RouteOptimizedWaypoint> optimizedWaypoints = default, RouteResponseReport report = default)
+        public static RouteDirectionsResponse RouteDirectionsResponse(string formatVersion = null, IEnumerable<RouteDirectionsResult> routes = null, IEnumerable<RouteOptimizedWaypoint> optimizedWaypoints = null, RouteResponseReport report = null)
         {
             routes ??= new List<RouteDirectionsResult>();
             optimizedWaypoints ??= new List<RouteOptimizedWaypoint>();
-            return new RouteDirectionsResponse(formatVersion, routes, optimizedWaypoints, report);
+
+            return new RouteDirectionsResponse(formatVersion, routes?.ToList(), optimizedWaypoints?.ToList(), report);
         }
 
-        /// <summary> Initializes new instance of RouteDirectionsResult class. </summary>
+        /// <summary> Initializes a new instance of RouteDirectionsResult. </summary>
         /// <param name="summary"> Summary object. </param>
         /// <param name="legs"> Legs array. </param>
         /// <param name="sections"> Sections array. </param>
         /// <param name="guidance"> Contains guidance related elements. This field is present only when guidance was requested and is available. </param>
         /// <returns> A new <see cref="Models.RouteDirectionsResult"/> instance for mocking. </returns>
-        public static RouteDirectionsResult RouteDirectionsResult(RouteDirectionsSummary summary = default, IReadOnlyList<RouteResultLeg> legs = default, IReadOnlyList<RouteResultSection> sections = default, RouteResultGuidance guidance = default)
+        public static RouteDirectionsResult RouteDirectionsResult(RouteDirectionsSummary summary = null, IEnumerable<RouteResultLeg> legs = null, IEnumerable<RouteResultSection> sections = null, RouteResultGuidance guidance = null)
         {
             legs ??= new List<RouteResultLeg>();
             sections ??= new List<RouteResultSection>();
-            return new RouteDirectionsResult(summary, legs, sections, guidance);
+
+            return new RouteDirectionsResult(summary, legs?.ToList(), sections?.ToList(), guidance);
         }
 
-        /// <summary> Initializes new instance of RouteDirectionsSummary class. </summary>
+        /// <summary> Initializes a new instance of RouteDirectionsSummary. </summary>
         /// <param name="lengthInMeters"> Length In Meters property. </param>
         /// <param name="travelTimeInSeconds"> Estimated travel time in seconds property that includes the delay due to real-time traffic. Note that even when traffic=false travelTimeInSeconds still includes the delay due to traffic. If DepartAt is in the future, travel time is calculated using time-dependent historic traffic data. </param>
         /// <param name="trafficDelayInSeconds"> Estimated delay in seconds caused by the real-time incident(s) according to traffic information. For routes planned with departure time in the future, delays is always 0. To return additional travel times using different types of traffic information, parameter computeTravelTimeFor=all needs to be added. </param>
         /// <param name="departureTime"> Departure Time property. </param>
         /// <param name="arrivalTime"> Arrival Time property. </param>
         /// <returns> A new <see cref="Models.RouteDirectionsSummary"/> instance for mocking. </returns>
-        public static RouteDirectionsSummary RouteDirectionsSummary(int? lengthInMeters = default, int? travelTimeInSeconds = default, int? trafficDelayInSeconds = default, string departureTime = default, string arrivalTime = default)
+        public static RouteDirectionsSummary RouteDirectionsSummary(int? lengthInMeters = null, int? travelTimeInSeconds = null, int? trafficDelayInSeconds = null, string departureTime = null, string arrivalTime = null)
         {
             return new RouteDirectionsSummary(lengthInMeters, travelTimeInSeconds, trafficDelayInSeconds, departureTime, arrivalTime);
         }
 
-        /// <summary> Initializes new instance of RouteResultLeg class. </summary>
+        /// <summary> Initializes a new instance of RouteResultLeg. </summary>
         /// <param name="summary"> Summary object for route section. </param>
         /// <param name="points"> Points array. </param>
         /// <returns> A new <see cref="Models.RouteResultLeg"/> instance for mocking. </returns>
-        public static RouteResultLeg RouteResultLeg(RouteResultLegSummary summary = default, IReadOnlyList<CoordinatesPair> points = default)
+        public static RouteResultLeg RouteResultLeg(RouteResultLegSummary summary = null, IEnumerable<CoordinatesPair> points = null)
         {
             points ??= new List<CoordinatesPair>();
-            return new RouteResultLeg(summary, points);
+
+            return new RouteResultLeg(summary, points?.ToList());
         }
 
-        /// <summary> Initializes new instance of CoordinatesPair class. </summary>
+        /// <summary> Initializes a new instance of CoordinatesPair. </summary>
         /// <param name="latitude"> Latitude property. </param>
         /// <param name="longitude"> Longitude property. </param>
         /// <returns> A new <see cref="Models.CoordinatesPair"/> instance for mocking. </returns>
-        public static CoordinatesPair CoordinatesPair(double? latitude = default, double? longitude = default)
+        public static CoordinatesPair CoordinatesPair(double? latitude = null, double? longitude = null)
         {
             return new CoordinatesPair(latitude, longitude);
         }
 
-        /// <summary> Initializes new instance of RouteResultSection class. </summary>
+        /// <summary> Initializes a new instance of RouteResultSection. </summary>
         /// <param name="startPointIndex"> Start Point Index property. </param>
         /// <param name="endPointIndex"> End Point Index property. </param>
         /// <param name="sectionType"> Section Type property. </param>
@@ -178,42 +183,44 @@ namespace Azure.Maps.Route
         /// <param name="magnitudeOfDelay"> The magnitude of delay caused by the incident. These values correspond to the values of the response field ty of the [Get Traffic Incident Detail API](https://docs.microsoft.com/rest/api/maps/traffic/gettrafficincidentdetail). </param>
         /// <param name="tec"> Details of the traffic event, using definitions in the [TPEG2-TEC](https://www.iso.org/standard/63116.html) standard. Can contain effectCode and causes elements. </param>
         /// <returns> A new <see cref="Models.RouteResultSection"/> instance for mocking. </returns>
-        public static RouteResultSection RouteResultSection(int? startPointIndex = default, int? endPointIndex = default, string sectionType = default, string travelMode = default, string simpleCategory = default, int? effectiveSpeedInKmh = default, int? delayInSeconds = default, MagnitudeOfDelay? magnitudeOfDelay = default, RouteResultSectionTec tec = default)
+        public static RouteResultSection RouteResultSection(int? startPointIndex = null, int? endPointIndex = null, string sectionType = null, string travelMode = null, string simpleCategory = null, int? effectiveSpeedInKmh = null, int? delayInSeconds = null, MagnitudeOfDelay? magnitudeOfDelay = null, RouteResultSectionTec tec = null)
         {
             return new RouteResultSection(startPointIndex, endPointIndex, sectionType, travelMode, simpleCategory, effectiveSpeedInKmh, delayInSeconds, magnitudeOfDelay, tec);
         }
 
-        /// <summary> Initializes new instance of RouteResultSectionTec class. </summary>
+        /// <summary> Initializes a new instance of RouteResultSectionTec. </summary>
         /// <param name="effectCode"> The effect on the traffic flow. Contains a value in the tec001:EffectCode table, as defined in the [TPEG2-TEC](https://www.iso.org/standard/63116.html) standard. Can be used to color-code traffic events according to severity. </param>
         /// <param name="causes"> Causes array. </param>
         /// <returns> A new <see cref="Models.RouteResultSectionTec"/> instance for mocking. </returns>
-        public static RouteResultSectionTec RouteResultSectionTec(int? effectCode = default, IReadOnlyList<RouteResultSectionTecCause> causes = default)
+        public static RouteResultSectionTec RouteResultSectionTec(int? effectCode = null, IEnumerable<RouteResultSectionTecCause> causes = null)
         {
             causes ??= new List<RouteResultSectionTecCause>();
-            return new RouteResultSectionTec(effectCode, causes);
+
+            return new RouteResultSectionTec(effectCode, causes?.ToList());
         }
 
-        /// <summary> Initializes new instance of RouteResultSectionTecCause class. </summary>
+        /// <summary> Initializes a new instance of RouteResultSectionTecCause. </summary>
         /// <param name="mainCauseCode"> The main cause of the traffic event. Contains a value in the tec002:CauseCode table, as defined in the [TPEG2-TEC](https://www.iso.org/standard/63116.html) standard. </param>
         /// <param name="subCauseCode"> The subcause of the traffic event. Contains a value in the sub cause table defined by the mainCauseCode, as defined in the [TPEG2-TEC](https://www.iso.org/standard/63116.html) standard. </param>
         /// <returns> A new <see cref="Models.RouteResultSectionTecCause"/> instance for mocking. </returns>
-        public static RouteResultSectionTecCause RouteResultSectionTecCause(int? mainCauseCode = default, int? subCauseCode = default)
+        public static RouteResultSectionTecCause RouteResultSectionTecCause(int? mainCauseCode = null, int? subCauseCode = null)
         {
             return new RouteResultSectionTecCause(mainCauseCode, subCauseCode);
         }
 
-        /// <summary> Initializes new instance of RouteResultGuidance class. </summary>
+        /// <summary> Initializes a new instance of RouteResultGuidance. </summary>
         /// <param name="instructions"> A list of instructions describing maneuvers. </param>
         /// <param name="instructionGroups"> Groups a sequence of instruction elements which are related to each other. </param>
         /// <returns> A new <see cref="Models.RouteResultGuidance"/> instance for mocking. </returns>
-        public static RouteResultGuidance RouteResultGuidance(IReadOnlyList<RouteResultInstruction> instructions = default, IReadOnlyList<RouteResultInstructionGroup> instructionGroups = default)
+        public static RouteResultGuidance RouteResultGuidance(IEnumerable<RouteResultInstruction> instructions = null, IEnumerable<RouteResultInstructionGroup> instructionGroups = null)
         {
             instructions ??= new List<RouteResultInstruction>();
             instructionGroups ??= new List<RouteResultInstructionGroup>();
-            return new RouteResultGuidance(instructions, instructionGroups);
+
+            return new RouteResultGuidance(instructions?.ToList(), instructionGroups?.ToList());
         }
 
-        /// <summary> Initializes new instance of RouteResultInstruction class. </summary>
+        /// <summary> Initializes a new instance of RouteResultInstruction. </summary>
         /// <param name="routeOffsetInMeters"> Distance from the start of the route to the point of the instruction. </param>
         /// <param name="travelTimeInSeconds"> Estimated travel time up to the point corresponding to routeOffsetInMeters. </param>
         /// <param name="point"> A location represented as a latitude and longitude. </param>
@@ -237,7 +244,7 @@ namespace Azure.Maps.Route
         /// If junctionType indicates a bifurcation instruction:
         /// 
         ///   * &lt;0 - keep left
-        ///   * \&gt;0 - keep right.
+        ///   * \&gt;0 - keep right
         /// </param>
         /// <param name="roundaboutExitNumber"> This indicates which exit to take at a roundabout. </param>
         /// <param name="possibleCombineWithNext"> It is possible to optionally combine the instruction with the next one. This can be used to build messages like &quot;Turn left and then turn right&quot;. </param>
@@ -257,122 +264,126 @@ namespace Azure.Maps.Route
         /// ```
         /// Turn left onto Einsteinweg/A10/E22 towards Ring Amsterdam
         /// then follow Einsteinweg/A10/E22 towards Ring Amsterdam.
-        /// ```.
+        /// ```
         /// </param>
         /// <returns> A new <see cref="Models.RouteResultInstruction"/> instance for mocking. </returns>
-        public static RouteResultInstruction RouteResultInstruction(int? routeOffsetInMeters = default, int? travelTimeInSeconds = default, CoordinatesPair point = default, int? pointIndex = default, GuidanceInstructionType? instructionType = default, IReadOnlyList<string> roadNumbers = default, string exitNumber = default, string street = default, string signpostText = default, string countryCode = default, string stateCode = default, JunctionType? junctionType = default, int? turnAngleInDecimalDegrees = default, string roundaboutExitNumber = default, bool? possibleCombineWithNext = default, DrivingSide? drivingSide = default, GuidanceManeuver? maneuver = default, string message = default, string combinedMessage = default)
+        public static RouteResultInstruction RouteResultInstruction(int? routeOffsetInMeters = null, int? travelTimeInSeconds = null, CoordinatesPair point = null, int? pointIndex = null, GuidanceInstructionType? instructionType = null, IEnumerable<string> roadNumbers = null, string exitNumber = null, string street = null, string signpostText = null, string countryCode = null, string stateCode = null, JunctionType? junctionType = null, int? turnAngleInDecimalDegrees = null, string roundaboutExitNumber = null, bool? possibleCombineWithNext = null, DrivingSide? drivingSide = null, GuidanceManeuver? maneuver = null, string message = null, string combinedMessage = null)
         {
             roadNumbers ??= new List<string>();
-            return new RouteResultInstruction(routeOffsetInMeters, travelTimeInSeconds, point, pointIndex, instructionType, roadNumbers, exitNumber, street, signpostText, countryCode, stateCode, junctionType, turnAngleInDecimalDegrees, roundaboutExitNumber, possibleCombineWithNext, drivingSide, maneuver, message, combinedMessage);
+
+            return new RouteResultInstruction(routeOffsetInMeters, travelTimeInSeconds, point, pointIndex, instructionType, roadNumbers?.ToList(), exitNumber, street, signpostText, countryCode, stateCode, junctionType, turnAngleInDecimalDegrees, roundaboutExitNumber, possibleCombineWithNext, drivingSide, maneuver, message, combinedMessage);
         }
 
-        /// <summary> Initializes new instance of RouteResultInstructionGroup class. </summary>
+        /// <summary> Initializes a new instance of RouteResultInstructionGroup. </summary>
         /// <param name="firstInstructionIndex"> Index of the first instruction. </param>
         /// <param name="lastInstructionIndex"> Index of the last instruction. </param>
         /// <param name="groupLengthInMeters"> Length of the group. </param>
         /// <param name="groupMessage"> Summary message when human-readable text messages are requested for guidance (instructionType=text or tagged). </param>
         /// <returns> A new <see cref="Models.RouteResultInstructionGroup"/> instance for mocking. </returns>
-        public static RouteResultInstructionGroup RouteResultInstructionGroup(int? firstInstructionIndex = default, int? lastInstructionIndex = default, int? groupLengthInMeters = default, string groupMessage = default)
+        public static RouteResultInstructionGroup RouteResultInstructionGroup(int? firstInstructionIndex = null, int? lastInstructionIndex = null, int? groupLengthInMeters = null, string groupMessage = null)
         {
             return new RouteResultInstructionGroup(firstInstructionIndex, lastInstructionIndex, groupLengthInMeters, groupMessage);
         }
 
-        /// <summary> Initializes new instance of RouteOptimizedWaypoint class. </summary>
+        /// <summary> Initializes a new instance of RouteOptimizedWaypoint. </summary>
         /// <param name="providedIndex"> Way point index provided by the user. </param>
         /// <param name="optimizedIndex"> Optimized way point index from the system. </param>
         /// <returns> A new <see cref="Models.RouteOptimizedWaypoint"/> instance for mocking. </returns>
-        public static RouteOptimizedWaypoint RouteOptimizedWaypoint(int? providedIndex = default, int? optimizedIndex = default)
+        public static RouteOptimizedWaypoint RouteOptimizedWaypoint(int? providedIndex = null, int? optimizedIndex = null)
         {
             return new RouteOptimizedWaypoint(providedIndex, optimizedIndex);
         }
 
-        /// <summary> Initializes new instance of RouteResponseReport class. </summary>
+        /// <summary> Initializes a new instance of RouteResponseReport. </summary>
         /// <param name="effectiveSettings"> Effective parameters or data used when calling this Route API. </param>
         /// <returns> A new <see cref="Models.RouteResponseReport"/> instance for mocking. </returns>
-        public static RouteResponseReport RouteResponseReport(IReadOnlyList<RouteResponseReportEffectiveSetting> effectiveSettings = default)
+        public static RouteResponseReport RouteResponseReport(IEnumerable<RouteResponseReportEffectiveSetting> effectiveSettings = null)
         {
             effectiveSettings ??= new List<RouteResponseReportEffectiveSetting>();
-            return new RouteResponseReport(effectiveSettings);
+
+            return new RouteResponseReport(effectiveSettings?.ToList());
         }
 
-        /// <summary> Initializes new instance of RouteResponseReportEffectiveSetting class. </summary>
+        /// <summary> Initializes a new instance of RouteResponseReportEffectiveSetting. </summary>
         /// <param name="key"> Name of the parameter used. </param>
         /// <param name="value"> Value of the parameter used. </param>
         /// <returns> A new <see cref="Models.RouteResponseReportEffectiveSetting"/> instance for mocking. </returns>
-        public static RouteResponseReportEffectiveSetting RouteResponseReportEffectiveSetting(string key = default, string value = default)
+        public static RouteResponseReportEffectiveSetting RouteResponseReportEffectiveSetting(string key = null, string value = null)
         {
             return new RouteResponseReportEffectiveSetting(key, value);
         }
 
-        /// <summary> Initializes new instance of GetRouteRangeResponse class. </summary>
+        /// <summary> Initializes a new instance of GetRouteRangeResponse. </summary>
         /// <param name="formatVersion"> Format Version property. </param>
         /// <param name="reachableRange"> Reachable Range. </param>
         /// <param name="report"> Reports the effective settings used in the current call. </param>
         /// <returns> A new <see cref="Models.GetRouteRangeResponse"/> instance for mocking. </returns>
-        public static GetRouteRangeResponse GetRouteRangeResponse(string formatVersion = default, RouteRange reachableRange = default, RouteResponseReport report = default)
+        public static GetRouteRangeResponse GetRouteRangeResponse(string formatVersion = null, RouteRange reachableRange = null, RouteResponseReport report = null)
         {
             return new GetRouteRangeResponse(formatVersion, reachableRange, report);
         }
 
-        /// <summary> Initializes new instance of RouteRange class. </summary>
+        /// <summary> Initializes a new instance of RouteRange. </summary>
         /// <param name="center"> Center point of the reachable range. </param>
         /// <param name="boundary"> Polygon boundary of the reachable range represented as a list of points. </param>
         /// <returns> A new <see cref="Models.RouteRange"/> instance for mocking. </returns>
-        public static RouteRange RouteRange(CoordinatesPair center = default, IReadOnlyList<CoordinatesPair> boundary = default)
+        public static RouteRange RouteRange(CoordinatesPair center = null, IEnumerable<CoordinatesPair> boundary = null)
         {
             boundary ??= new List<CoordinatesPair>();
-            return new RouteRange(center, boundary);
+
+            return new RouteRange(center, boundary?.ToList());
         }
 
-        /// <summary> Initializes new instance of BatchResponse class. </summary>
+        /// <summary> Initializes a new instance of BatchResponse. </summary>
         /// <param name="summary"> Summary for the batch request. </param>
         /// <returns> A new <see cref="Models.BatchResponse"/> instance for mocking. </returns>
-        public static BatchResponse BatchResponse(BatchResponseSummary summary = default)
+        public static BatchResponse BatchResponse(BatchResponseSummary summary = null)
         {
             return new BatchResponse(summary);
         }
 
-        /// <summary> Initializes new instance of BatchResponseSummary class. </summary>
+        /// <summary> Initializes a new instance of BatchResponseSummary. </summary>
         /// <param name="successfulRequests"> Number of successful requests in the batch. </param>
         /// <param name="totalRequests"> Total number of requests in the batch. </param>
         /// <returns> A new <see cref="Models.BatchResponseSummary"/> instance for mocking. </returns>
-        public static BatchResponseSummary BatchResponseSummary(int? successfulRequests = default, int? totalRequests = default)
+        public static BatchResponseSummary BatchResponseSummary(int? successfulRequests = null, int? totalRequests = null)
         {
             return new BatchResponseSummary(successfulRequests, totalRequests);
         }
 
-        /// <summary> Initializes new instance of RouteDirectionsBatchResponse class. </summary>
+        /// <summary> Initializes a new instance of RouteDirectionsBatchResponse. </summary>
         /// <param name="summary"> Summary for the batch request. </param>
         /// <param name="batchItems"> Array containing the batch results. </param>
         /// <returns> A new <see cref="Models.RouteDirectionsBatchResponse"/> instance for mocking. </returns>
-        public static RouteDirectionsBatchResponse RouteDirectionsBatchResponse(BatchResponseSummary summary = default, IReadOnlyList<RouteDirectionsBatchItem> batchItems = default)
+        public static RouteDirectionsBatchResponse RouteDirectionsBatchResponse(BatchResponseSummary summary = null, IEnumerable<RouteDirectionsBatchItem> batchItems = null)
         {
             batchItems ??= new List<RouteDirectionsBatchItem>();
-            return new RouteDirectionsBatchResponse(summary, batchItems);
+
+            return new RouteDirectionsBatchResponse(summary, batchItems?.ToList());
         }
 
-        /// <summary> Initializes new instance of BatchItem class. </summary>
+        /// <summary> Initializes a new instance of BatchItem. </summary>
         /// <param name="statusCode"> HTTP request status code. </param>
         /// <returns> A new <see cref="Models.BatchItem"/> instance for mocking. </returns>
-        public static BatchItem BatchItem(float? statusCode = default)
+        public static BatchItem BatchItem(float? statusCode = null)
         {
             return new BatchItem(statusCode);
         }
 
-        /// <summary> Initializes new instance of RouteDirectionsBatchItem class. </summary>
+        /// <summary> Initializes a new instance of RouteDirectionsBatchItem. </summary>
         /// <param name="statusCode"> HTTP request status code. </param>
         /// <param name="response"> The result of the query. RouteDirectionsResponse if the query completed successfully, ErrorResponse otherwise. </param>
         /// <returns> A new <see cref="Models.RouteDirectionsBatchItem"/> instance for mocking. </returns>
-        public static RouteDirectionsBatchItem RouteDirectionsBatchItem(float? statusCode = default, RouteDirectionsBatchItemResponse response = default)
+        public static RouteDirectionsBatchItem RouteDirectionsBatchItem(float? statusCode = null, RouteDirectionsBatchItemResponse response = null)
         {
             return new RouteDirectionsBatchItem(statusCode, response);
         }
 
-        /// <summary> Initializes new instance of RouteDirectionsBatchItemResponse class. </summary>
+        /// <summary> Initializes a new instance of RouteDirectionsBatchItemResponse. </summary>
         /// <param name="formatVersion"> Format Version property. </param>
         /// <param name="routes"> Routes array. </param>
         /// <param name="optimizedWaypoints">
-        /// Optimized sequence of waypoints. It shows the index from the user provided waypoint sequence for the original and optimized list. For instance, a response:
+        /// Optimized sequence of waypoints. It shows the index from the user provided waypoint sequence for the original and optimized list. For instance, a response: 
         /// 
         /// ```
         /// &lt;optimizedWaypoints&gt;
@@ -387,11 +398,12 @@ namespace Azure.Maps.Route
         /// <param name="report"> Reports the effective settings used in the current call. </param>
         /// <param name="error"> The error object. </param>
         /// <returns> A new <see cref="Models.RouteDirectionsBatchItemResponse"/> instance for mocking. </returns>
-        public static RouteDirectionsBatchItemResponse RouteDirectionsBatchItemResponse(string formatVersion = default, IReadOnlyList<RouteDirectionsResult> routes = default, IReadOnlyList<RouteOptimizedWaypoint> optimizedWaypoints = default, RouteResponseReport report = default, ErrorDetail error = default)
+        public static RouteDirectionsBatchItemResponse RouteDirectionsBatchItemResponse(string formatVersion = null, IEnumerable<RouteDirectionsResult> routes = null, IEnumerable<RouteOptimizedWaypoint> optimizedWaypoints = null, RouteResponseReport report = null, ErrorDetail error = null)
         {
             routes ??= new List<RouteDirectionsResult>();
             optimizedWaypoints ??= new List<RouteOptimizedWaypoint>();
-            return new RouteDirectionsBatchItemResponse(formatVersion, routes, optimizedWaypoints, report, error);
+
+            return new RouteDirectionsBatchItemResponse(formatVersion, routes?.ToList(), optimizedWaypoints?.ToList(), report, error);
         }
     }
 }

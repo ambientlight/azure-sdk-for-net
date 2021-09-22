@@ -15,7 +15,7 @@ namespace Azure.Maps.Route.Models
     {
         private readonly string _value;
 
-        /// <summary> Determines if two <see cref="RouteInstructionsType"/> values are the same. </summary>
+        /// <summary> Initializes a new instance of <see cref="RouteInstructionsType"/>. </summary>
         /// <exception cref="ArgumentNullException"> <paramref name="value"/> is null. </exception>
         public RouteInstructionsType(string value)
         {
@@ -38,7 +38,7 @@ namespace Azure.Maps.Route.Models
         /// ```
         /// Turn left onto &lt;roadNumber&gt;A4&lt;/roadNumber&gt;/&lt;roadNumber&gt;E19&lt;/roadNumber&gt;
         /// towards &lt;signpostText&gt;Den Haag&lt;/signpostText&gt;
-        /// ```.
+        /// ```
         /// </summary>
         public static RouteInstructionsType Tagged { get; } = new RouteInstructionsType(TaggedValue);
         /// <summary> Determines if two <see cref="RouteInstructionsType"/> values are the same. </summary>

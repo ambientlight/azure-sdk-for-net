@@ -15,7 +15,7 @@ namespace Azure.Maps.Route.Models
     {
         private readonly string _value;
 
-        /// <summary> Determines if two <see cref="VehicleLoadType"/> values are the same. </summary>
+        /// <summary> Initializes a new instance of <see cref="VehicleLoadType"/>. </summary>
         /// <exception cref="ArgumentNullException"> <paramref name="value"/> is null. </exception>
         public VehicleLoadType(string value)
         {
